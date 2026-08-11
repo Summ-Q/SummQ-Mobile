@@ -23,19 +23,16 @@ class AppColors {
       scaffoldBackgroundColor: navy,
       primaryColor: yellowCard,
 
-      // Makes all standard text white by default to contrast the dark background
       textTheme: const TextTheme(
         bodyLarge: TextStyle(color: bottomBarBg, fontSize: 16),
         bodyMedium: TextStyle(color: Colors.white70, fontSize: 14),
       ),
 
-      // Styles the Floating Action Button globally
       floatingActionButtonTheme: const FloatingActionButtonThemeData(
         backgroundColor: yellowCard,
         foregroundColor: navy,
       ),
 
-      // Styles the standard ElevatedButtons (like Login/Sign Up) globally
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: yellowCard,

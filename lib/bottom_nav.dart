@@ -8,8 +8,6 @@ class NavTabData {
   const NavTabData({required this.icon, required this.label, required this.color});
 }
 
-/// شريط سفلي كريمي، فيه دائرة عائمة بتتحرك لمكان التاب اللي بتدوس عليه
-/// وبتاخد لون التاب ده، والتابات التانية بتتحول لأيقونة+نص عادي جوه الشريط.
 class BottomNav extends StatelessWidget {
   final int currentIndex;
   final ValueChanged<int> onTap;
@@ -33,7 +31,6 @@ class BottomNav extends StatelessWidget {
           return Stack(
             clipBehavior: Clip.none,
             children: [
-              // الشريط الكريمي الأساسي
               Positioned(
                 left: 0,
                 right: 0,
@@ -54,7 +51,6 @@ class BottomNav extends StatelessWidget {
                           child: Center(
                             child: AnimatedOpacity(
                               duration: const Duration(milliseconds: 220),
-                              // لو التاب ده مختار، الأيقونة بتتخبى وراء الدائرة العايمة فوق
                               opacity: selected ? 0 : 1,
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
@@ -79,7 +75,6 @@ class BottomNav extends StatelessWidget {
                   ),
                 ),
               ),
-              // الدائرة العايمة المتحركة
               AnimatedPositioned(
                 duration: const Duration(milliseconds: 320),
                 curve: Curves.easeOutCubic,

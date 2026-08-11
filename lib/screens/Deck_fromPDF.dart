@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_flutter/theme.dart';
-
 import '../AiLoading_Modal.dart';
 
 Future<void> showDeckModal(BuildContext context) {
