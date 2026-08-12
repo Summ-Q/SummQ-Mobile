@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mobile_flutter/screens/Deck_fromPDF.dart';
 import 'package:mobile_flutter/screens/paste_note.dart';
 import 'package:mobile_flutter/screens/study_flashcards.dart';
+import '../models/user_model.dart' as widget;
 import '../theme.dart';
 
 class HomeTab extends StatelessWidget {

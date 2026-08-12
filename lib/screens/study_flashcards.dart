@@ -102,7 +102,11 @@ class _StudyFlashcardState extends State<StudyFlashcard> {
                         ),
                       ),
                       ElevatedButton(
-                        style: ButtonStyle(),
+                        style: ElevatedButton.styleFrom(
+                          foregroundColor: AppColors.yellowLink,
+                          backgroundColor: AppColors.creamText,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                        ),
                         onPressed: () {
                           _controller.toggleCard();
                           isPressed == true;

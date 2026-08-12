@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 
+import '../theme.dart';
+
 class sessionComplete extends StatelessWidget {
   final int totalQuestions;
 
@@ -9,7 +11,7 @@ class sessionComplete extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.navy,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -21,15 +23,19 @@ class sessionComplete extends StatelessWidget {
             ),
 
             const Text(
-              "Quiz Completed!",
-              style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.deepPurple),
+              "session Complete!",
+              style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: AppColors.yellowCard),
             ),
 
             const SizedBox(height: 20),
 
             Text(
-              "Your Score :",
-              style: TextStyle(fontSize: 20, color: Colors.grey[700]),
+              "Great job, mai! 🎉",
+              style: TextStyle(fontSize: 20, color: AppColors.orangCream),
+            ),
+            Text(
+              "You Reviewed 10 Cards",
+              style: TextStyle(fontSize: 20, color: AppColors.cream),
             ),
 
 
@@ -37,7 +43,7 @@ class sessionComplete extends StatelessWidget {
 
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.deepPurple,
+                backgroundColor: AppColors.greyCard,
                 padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
               ),
