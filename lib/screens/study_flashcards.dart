@@ -109,7 +109,7 @@ class _StudyFlashcardState extends State<StudyFlashcard> {
                         ),
                         onPressed: () {
                           _controller.toggleCard();
-                          isPressed == true;
+                          isPressed = true;
                         },
                         child: const Text('Show answer'),
                       )
@@ -153,7 +153,7 @@ class _StudyFlashcardState extends State<StudyFlashcard> {
                       } else {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => sessionComplete(totalQuestions: totalQuestions,)),
+                          MaterialPageRoute(builder: (context) => SessionComplete(totalQuestions: totalQuestions,)),
                         );
                       }
                     });

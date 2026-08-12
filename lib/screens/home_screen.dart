@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:mobile_flutter/screens/Deck_fromPDF.dart';
 import 'package:mobile_flutter/screens/paste_note.dart';
 import 'package:mobile_flutter/screens/study_flashcards.dart';
-import '../models/user_model.dart' as widget;
 import '../theme.dart';
 
 class HomeTab extends StatelessWidget {
@@ -19,85 +18,87 @@ class HomeTab extends StatelessWidget {
   Widget build(BuildContext context) {
     return SafeArea(
       bottom: false,
-      child: SingleChildScrollView(
+      child: Padding(
         padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Welcome back,',
-                        style: appFont(size: 20, weight: FontWeight.w700, color: AppColors.yellowLink)),
-                    Text(userName, style: appFont(size: 26, weight: FontWeight.w800, color: Colors.white)),
-                  ],
-                ),
-                const Icon(Icons.settings_outlined, color: Colors.white, size: 26),
-              ],
-            ),
-            const SizedBox(height: 30),
-            Center(
-              child: Text(
-                "Let's get things done together ✨",
-                textAlign: TextAlign.center,
-                style: appFont(size: 20, weight: FontWeight.w600, color: AppColors.subtitleGrey),
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Welcome back,',
+                          style: appFont(size: 20, weight: FontWeight.w700, color: AppColors.yellowLink)),
+                      Text(userName, style: appFont(size: 26, weight: FontWeight.w800, color: Colors.white)),
+                    ],
+                  ),
+                  const Icon(Icons.settings_outlined, color: Colors.white, size: 26),
+                ],
               ),
-            ),
-            const SizedBox(height: 30),
-            Row(
-              children: [
-                Expanded(
-                  child: _StatCard(color: AppColors.green, value: '23', label: 'studied cards', textColor: Colors.white),
+              const SizedBox(height: 30),
+              Center(
+                child: Text(
+                  "Let's get things done\n together ✨",
+                  textAlign: TextAlign.center,
+                  style: appFont(size: 20, weight: FontWeight.w600, color: AppColors.subtitleGrey),
                 ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: _StatCard(color: AppColors.greyCard, value: '17', label: 'Deck created', textColor: AppColors.navy),
-                ),
-              ],
-            ),
-            const SizedBox(height: 14),
-            Row(
-              children: [
-                Expanded(
-                  child: GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => pasteScreen()),
-                        );
-                      },
-                      child: _IconCard(color: AppColors.lightBlue, icon: Icons.edit_note_rounded)),
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: GestureDetector(
-                      onTap: () {
-                        showDeckModal(context);
-                      },
-                      child: _IconCard(color: AppColors.yellowCard, icon: Icons.note_add_rounded)),
-                ),
-              ],
-            ),
-            const SizedBox(height: 26),
-            Text('Your Decks', style: appFont(size: 20, weight: FontWeight.w700, color: Colors.white)),
-            const SizedBox(height: 14),
-            ...decks.map((d) => Padding(
-                  padding: const EdgeInsets.only(bottom: 14),
-                  child: GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => StudyFlashcard()),
-                        );
-                      },
-                      child: _DeckCard(data: d)),
-                )),
-            const SizedBox(height: 100),
-          ],
-        ),
+              ),
+              const SizedBox(height: 30),
+              Row(
+                children: [
+                  Expanded(
+                    child: _StatCard(color: AppColors.green, value: '23', label: 'studied cards', textColor: Colors.white),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: _StatCard(color: AppColors.greyCard, value: '17', label: 'Deck created', textColor: AppColors.navy),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 14),
+              Row(
+                children: [
+                  Expanded(
+                    child: GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => PasteScreen()),
+                          );
+                        },
+                        child: _IconCard(color: AppColors.lightBlue, icon: Icons.edit_note_rounded)),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: GestureDetector(
+                        onTap: () {
+                          showDeckModal(context);
+                        },
+                        child: _IconCard(color: AppColors.yellowCard, icon: Icons.note_add_rounded)),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 26),
+              Text('Your Decks', style: appFont(size: 20, weight: FontWeight.w700, color: Colors.white)),
+              const SizedBox(height: 14),
+              ...decks.map((d) => SingleChildScrollView(
+                child: Padding(
+                      padding: const EdgeInsets.only(bottom: 14),
+                      child: GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => StudyFlashcard()),
+                            );
+                          },
+                          child: _DeckCard(data: d)),
+                    ),
+              )),
+              const SizedBox(height: 100),
+            ],
+          ),
       ),
     );
   }
