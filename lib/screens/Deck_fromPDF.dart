@@ -1,3 +1,4 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile_flutter/theme.dart';
 import '../AiLoading_Modal.dart';
@@ -6,6 +7,11 @@ Future<void> showDeckModal(BuildContext context) {
   return showDialog(
     context: context,
     builder: (BuildContext context) {
+      final deckNameController = TextEditingController();
+      PlatformFile? pickedFile;
+      String? selectedFileName;
+      return StatefulBuilder(
+      builder: (context, setState) {
       return Dialog(
         backgroundColor: AppColors.cream,
         shape: RoundedRectangleBorder(
@@ -16,40 +22,22 @@ Future<void> showDeckModal(BuildContext context) {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    "Enter deck name ?",
-                    style: TextStyle(
-                      color: AppColors.creamText,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Column(
-                    children: [
-                      const Icon(Icons.description, color: Colors.red, size: 32),
-                      const Text(
-                        "PDF",
-                        style: TextStyle(
-                          color: Colors.red,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
-                  )
-                ],
+              const Text(
+                "Enter deck name ?",
+                style: TextStyle(
+                  color: AppColors.creamText,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-              const SizedBox(height: 24),
-
+              SizedBox(height: 5,),
               TextField(
+                controller: deckNameController,
                 style: const TextStyle(color: AppColors.creamText),
                 decoration: InputDecoration(
-                  hintText: "like math3",
+                  hintText: "...............................................",
                   filled: true,
-                  fillColor: Colors.grey.shade300,
+                  fillColor: AppColors.gold,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(30),
                     borderSide: BorderSide.none,
@@ -60,7 +48,38 @@ Future<void> showDeckModal(BuildContext context) {
                   ),
                 ),
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: 25),
+              OutlinedButton.icon(
+                onPressed: () async {
+                  PlatformFile? file = await FilePicker.pickFile(
+                    type: FileType.custom,
+                    allowedExtensions: ['pdf'],
+                  );
+
+                  if (file != null) {
+                    setState(() {
+                      selectedFileName = file.name;
+                    });
+
+                    // For backend upload later:
+                    // final path = file.path;
+                    // final bytes = await file.readAsBytes();
+                  }
+                },
+                icon: const Icon(Icons.upload_file, color: AppColors.creamText),
+                label: Text(
+                  selectedFileName ?? "Upload PDF",
+                  style: const TextStyle(color: AppColors.creamText),
+                ),
+                style: OutlinedButton.styleFrom(
+                  side: const BorderSide(color: AppColors.creamText),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 30),
 
               // Action Buttons (Done / Cancel)
               Row(
@@ -68,17 +87,23 @@ Future<void> showDeckModal(BuildContext context) {
                 children: [
                   ElevatedButton(
                     onPressed: () {
+                      if (selectedFileName == null) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text("Please select a PDF first!")),
+                        );
+                        return;
+                      }
                       Navigator.pop(context);
                       showAILoadingModal(context);
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.creamText,
-                      foregroundColor: AppColors.cream,
+                      foregroundColor: AppColors.yellowLink,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(20),
                       ),
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 32,
+                        horizontal: 25,
                         vertical: 12,
                       ),
                     ),
@@ -95,7 +120,7 @@ Future<void> showDeckModal(BuildContext context) {
                         borderRadius: BorderRadius.circular(20),
                       ),
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 32,
+                        horizontal: 20,
                         vertical: 12,
                       ),
                     ),
@@ -107,6 +132,7 @@ Future<void> showDeckModal(BuildContext context) {
           ),
         ),
       );
+      });
     },
   );
 }

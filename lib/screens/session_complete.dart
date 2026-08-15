@@ -34,7 +34,7 @@ class SessionComplete extends StatelessWidget {
               style: TextStyle(fontSize: 20, color: AppColors.orangCream),
             ),
             Text(
-              "You Reviewed 10 Cards",
+              "You Reviewed $totalQuestions Cards",
               style: TextStyle(fontSize: 20, color: AppColors.cream),
             ),
 

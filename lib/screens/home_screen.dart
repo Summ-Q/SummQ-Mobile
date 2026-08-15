@@ -2,17 +2,56 @@ import 'package:flutter/material.dart';
 import 'package:mobile_flutter/screens/Deck_fromPDF.dart';
 import 'package:mobile_flutter/screens/paste_note.dart';
 import 'package:mobile_flutter/screens/study_flashcards.dart';
+import 'package:mobile_flutter/models/flashcard_model.dart';
 import '../theme.dart';
 
-class HomeTab extends StatelessWidget {
+/// TODO: Replace this with a real API call once the backend is ready.
+class DeckRepository {
+  static Future<List<DeckData>> fetchDecks() async {
+    await Future.delayed(const Duration(milliseconds: 400)); // simulate network
+    return const [
+      DeckData(id: 1, title: 'logic', subtitle: 'Fundamentals of ...', progress: '12/30'),
+      DeckData(id: 2, title: 'Hardware', subtitle: 'Fundamentals of ...', progress: '10/12'),
+    ];
+  }
+
+  static List<FlashcardModel> mockCardsFor(DeckData deck) {
+    return List.generate(
+      5,
+          (i) => FlashcardModel(
+        id: i,
+        deckId: deck.id,
+        question: 'Sample question ${i + 1} for "${deck.title}"',
+        answer: 'Sample answer ${i + 1}',
+        difficultyLevel: 'medium',
+      ),
+    );
+  }
+}
+
+class HomeTab extends StatefulWidget {
   const HomeTab({super.key});
 
-  final String userName = 'mai';
+  @override
+  State<HomeTab> createState() => _HomeTabState();
+}
 
-  final List<_DeckData> decks = const [
-    _DeckData(title: 'logic', subtitle: 'Fundamentals of ...', progress: '12/30'),
-    _DeckData(title: 'Hardware', subtitle: 'Fundamentals of ...', progress: '10/12'),
-  ];
+class _HomeTabState extends State<HomeTab> {
+  final String userName = 'mai';
+  late Future<List<DeckData>> _decksFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _decksFuture = DeckRepository.fetchDecks();
+  }
+
+  Future<void> _refreshDecks() async {
+    setState(() {
+      _decksFuture = DeckRepository.fetchDecks();
+    });
+    await _decksFuture;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,95 +59,153 @@ class HomeTab extends StatelessWidget {
       bottom: false,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
-        child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Welcome back,',
-                          style: appFont(size: 20, weight: FontWeight.w700, color: AppColors.yellowLink)),
-                      Text(userName, style: appFont(size: 26, weight: FontWeight.w800, color: Colors.white)),
-                    ],
-                  ),
-                  const Icon(Icons.settings_outlined, color: Colors.white, size: 26),
-                ],
-              ),
-              const SizedBox(height: 30),
-              Center(
-                child: Text(
-                  "Let's get things done\n together ✨",
-                  textAlign: TextAlign.center,
-                  style: appFont(size: 20, weight: FontWeight.w600, color: AppColors.subtitleGrey),
+        child: RefreshIndicator(
+          onRefresh: _refreshDecks,
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Welcome back,',
+                            style: appFont(size: 20, weight: FontWeight.w700, color: AppColors.yellowLink)),
+                        Text(userName, style: appFont(size: 26, weight: FontWeight.w800, color: Colors.white)),
+                      ],
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Settings coming soon')),
+                        );
+                      },
+                      child: const Icon(Icons.settings_outlined, color: Colors.white, size: 26),
+                    ),
+                  ],
                 ),
-              ),
-              const SizedBox(height: 30),
-              Row(
-                children: [
-                  Expanded(
-                    child: _StatCard(color: AppColors.green, value: '23', label: 'studied cards', textColor: Colors.white),
+                const SizedBox(height: 30),
+                Center(
+                  child: Text(
+                    "Let's get things done\n together ✨",
+                    textAlign: TextAlign.center,
+                    style: appFont(size: 20, weight: FontWeight.w600, color: AppColors.subtitleGrey),
                   ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: _StatCard(color: AppColors.greyCard, value: '17', label: 'Deck created', textColor: AppColors.navy),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 14),
-              Row(
-                children: [
-                  Expanded(
-                    child: GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => PasteScreen()),
-                          );
-                        },
-                        child: _IconCard(color: AppColors.lightBlue, icon: Icons.edit_note_rounded)),
-                  ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: GestureDetector(
-                        onTap: () {
-                          showDeckModal(context);
-                        },
-                        child: _IconCard(color: AppColors.yellowCard, icon: Icons.note_add_rounded)),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 26),
-              Text('Your Decks', style: appFont(size: 20, weight: FontWeight.w700, color: Colors.white)),
-              const SizedBox(height: 14),
-              ...decks.map((d) => SingleChildScrollView(
-                child: Padding(
-                      padding: const EdgeInsets.only(bottom: 14),
+                ),
+                const SizedBox(height: 30),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _StatCard(
+                          color: AppColors.green, value: '23', label: 'studied cards', textColor: Colors.white),
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: _StatCard(
+                          color: AppColors.greyCard, value: '17', label: 'Deck created', textColor: AppColors.navy),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 14),
+                Row(
+                  children: [
+                    Expanded(
                       child: GestureDetector(
                           onTap: () {
                             Navigator.push(
                               context,
-                              MaterialPageRoute(builder: (context) => StudyFlashcard()),
+                              MaterialPageRoute(builder: (context) => const PasteScreen()),
                             );
                           },
-                          child: _DeckCard(data: d)),
+                          child: _IconCard(color: AppColors.lightBlue, icon: Icons.edit_note_rounded)),
                     ),
-              )),
-              const SizedBox(height: 100),
-            ],
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: GestureDetector(
+                          onTap: () {
+                            showDeckModal(context);
+                          },
+                          child: _IconCard(color: AppColors.yellowCard, icon: Icons.note_add_rounded)),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 26),
+                Text('Your Decks', style: appFont(size: 20, weight: FontWeight.w700, color: Colors.white)),
+                const SizedBox(height: 14),
+                FutureBuilder<List<DeckData>>(
+                  future: _decksFuture,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 40),
+                        child: Center(child: CircularProgressIndicator(color: AppColors.yellowLink)),
+                      );
+                    }
+
+                    if (snapshot.hasError) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 24),
+                        child: Text(
+                          "Couldn't load your decks. Pull down to try again.",
+                          style: appFont(size: 14, weight: FontWeight.w500, color: AppColors.subtitleGrey),
+                        ),
+                      );
+                    }
+
+                    final decks = snapshot.data ?? [];
+
+                    if (decks.isEmpty) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 24),
+                        child: Text(
+                          "No decks yet — create one above to get started.",
+                          style: appFont(size: 14, weight: FontWeight.w500, color: AppColors.subtitleGrey),
+                        ),
+                      );
+                    }
+
+                    return Column(
+                      children: decks
+                          .map((d) => Padding(
+                        padding: const EdgeInsets.only(bottom: 14),
+                        child: GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => StudyFlashcard(
+                                  deckTitle: d.title,
+                                  flashcards: DeckRepository.mockCardsFor(d),
+                                ),
+                              ),
+                            );
+                          },
+                          child: _DeckCard(data: d),
+                        ),
+                      ))
+                          .toList(),
+                    );
+                  },
+                ),
+                const SizedBox(height: 100),
+              ],
+            ),
           ),
+        ),
       ),
     );
   }
 }
 
-class _DeckData {
+class DeckData {
+  final int id;
   final String title;
   final String subtitle;
   final String progress;
-  const _DeckData({required this.title, required this.subtitle, required this.progress});
+  const DeckData({required this.id, required this.title, required this.subtitle, required this.progress});
 }
 
 class _StatCard extends StatelessWidget {
@@ -155,7 +252,7 @@ class _IconCard extends StatelessWidget {
 }
 
 class _DeckCard extends StatelessWidget {
-  final _DeckData data;
+  final DeckData data;
   const _DeckCard({required this.data});
 
   @override
