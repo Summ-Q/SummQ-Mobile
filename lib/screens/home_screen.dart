@@ -1,26 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_flutter/screens/Deck_fromPDF.dart';
 import 'package:mobile_flutter/screens/paste_note.dart';
+import 'package:mobile_flutter/screens/searchDeck_screen.dart';
 import 'package:mobile_flutter/screens/setting_screen.dart';
 import 'package:mobile_flutter/screens/study_flashcards.dart';
 import 'package:mobile_flutter/models/flashcard_model.dart';
+import '../cubit/stats_controller.dart';
 import '../theme.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-/// TODO: Replace this with a real API call once the backend is ready.
 class DeckRepository {
   static Future<List<DeckData>> fetchDecks() async {
     await Future.delayed(const Duration(milliseconds: 400)); // simulate network
     return const [
       DeckData(id: 1, title: 'logic', subtitle: 'Fundamentals of ...', progress: '12/30'),
       DeckData(id: 2, title: 'Hardware', subtitle: 'Fundamentals of ...', progress: '10/12'),
+      DeckData(id: 2, title: 'Math3', subtitle: 'Fundamentals of ...', progress: '0/10'),
+      DeckData(id: 2, title: 'physics', subtitle: 'Fundamentals of ...', progress: '0/10'),
     ];
   }
 
   static List<FlashcardModel> mockCardsFor(DeckData deck) {
-    return List.generate(
-      5,
-          (i) => FlashcardModel(
+    return List.generate(10, (i) => FlashcardModel(
         id: i,
         deckId: deck.id,
         question: 'Sample question ${i + 1} for "${deck.title}"',
@@ -45,12 +46,18 @@ class _HomeTabState extends State<HomeTab> {
   @override
   void initState() {
     super.initState();
-    _decksFuture = DeckRepository.fetchDecks();
+    _decksFuture = DeckRepository.fetchDecks().then((decks) {
+      StatsController.instance.setDecksCreated(decks.length);
+      return decks;
+    });
   }
 
   Future<void> _refreshDecks() async {
     setState(() {
-      _decksFuture = DeckRepository.fetchDecks();
+      _decksFuture = DeckRepository.fetchDecks().then((decks) {
+        StatsController.instance.setDecksCreated(decks.length);
+        return decks;
+      });
     });
     await _decksFuture;
   }
@@ -96,18 +103,33 @@ class _HomeTabState extends State<HomeTab> {
                   ),
                 ),
                 const SizedBox(height: 30),
-                Row(
-                  children: [
-                    Expanded(
-                      child: _StatCard(
-                          color: AppColors.greyCard, value: '23', label: 'studied cards', textColor: Colors.white),
-                    ),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: _StatCard(
-                          color: AppColors.greyCard, value: '17', label: 'Deck created', textColor: AppColors.navy),
-                    ),
-                  ],
+                ListenableBuilder(
+                  listenable: StatsController.instance,
+                  builder: (context, _) {
+                    return Row(
+                      children: [
+                        Expanded(
+                          child: _StatCard(
+                            color: AppColors.greyCard,
+                            value: '${StatsController.instance.studiedCards}',
+                            label: 'studied cards',
+                            textColor: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                            child: GestureDetector(
+                                  onTap: (){Navigator.push(context,MaterialPageRoute(builder: (context) => const SearchForDeck()),);},
+                                  child:_StatCard(
+                                        color: AppColors.greyCard,
+                                        value: '${StatsController.instance.decksCreated}',
+                                        label: 'Deck created',
+                                        textColor: AppColors.navy,
+                            ),
+                          ),)
+                      ],
+                    );
+                  },
                 ),
                 const SizedBox(height: 14),
                 Row(

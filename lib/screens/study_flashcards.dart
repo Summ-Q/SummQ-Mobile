@@ -4,6 +4,7 @@ import 'package:mobile_flutter/models/flashcard_model.dart';
 import 'package:mobile_flutter/screens/session_complete.dart';
 import 'package:mobile_flutter/theme.dart';
 import 'package:flip_card/flip_card.dart';
+import '../cubit/stats_controller.dart';
 import '../widgets/repeted_button.dart';
 
 
@@ -34,9 +35,10 @@ class _StudyFlashcardState extends State<StudyFlashcard> {
       setState(() {
         currentIndex++;
         isPressed = false;
-       // _controller.flip();
+       // _controller.flip(CardSide.front);
       });
     } else {
+      StatsController.instance.addStudiedCards(totalQuestions); // <-- add this
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
