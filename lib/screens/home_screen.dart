@@ -119,14 +119,20 @@ class _HomeTabState extends State<HomeTab> {
                         const SizedBox(width: 14),
                         Expanded(
                             child: GestureDetector(
-                                  onTap: (){Navigator.push(context,MaterialPageRoute(builder: (context) => const SearchForDeck()),);},
-                                  child:_StatCard(
-                                        color: AppColors.greyCard,
-                                        value: '${StatsController.instance.decksCreated}',
-                                        label: 'Deck created',
-                                        textColor: AppColors.navy,
+                              onTap: (){
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => const SearchForDeck()),
+                                );
+                              },
+                              child: _StatCard(
+                                color: AppColors.greyCard,
+                                value: '${StatsController.instance.decksCreated}',
+                                label: 'Deck created',
+                                textColor: AppColors.navy,
+                              ),
                             ),
-                          ),)
+                          ),
                       ],
                     );
                   },
