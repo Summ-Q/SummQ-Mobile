@@ -126,7 +126,11 @@ class _HomeTabState extends State<HomeTab> {
                                 );
                               },
                               child: _StatCard(
+<<<<<<< HEAD
                                 color: AppColors.subtitleGrey,
+=======
+                                color: AppColors.greyCard,
+>>>>>>> 5ed731d0ab94ff990f4943743f7861132eb0ba15
                                 value: '${StatsController.instance.decksCreated}',
                                 label: 'Deck created',
                                 textColor: AppColors.navy,
