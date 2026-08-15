@@ -38,7 +38,7 @@ class BottomNav extends StatelessWidget {
                 child: Container(
                   height: 60,
                   decoration: BoxDecoration(
-                    color: AppColors.bottomBarBg,
+                    color: AppColors.cream,
                     borderRadius: BorderRadius.circular(30),
                   ),
                   child: Row(

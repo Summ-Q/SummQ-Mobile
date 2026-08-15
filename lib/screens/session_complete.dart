@@ -3,10 +3,10 @@ import 'package:lottie/lottie.dart';
 
 import '../theme.dart';
 
-class sessionComplete extends StatelessWidget {
+class SessionComplete extends StatelessWidget {
   final int totalQuestions;
 
-  const sessionComplete({super.key, required this.totalQuestions});
+  const SessionComplete({super.key, required this.totalQuestions});
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +34,7 @@ class sessionComplete extends StatelessWidget {
               style: TextStyle(fontSize: 20, color: AppColors.orangCream),
             ),
             Text(
-              "You Reviewed 10 Cards",
+              "You Reviewed $totalQuestions Cards",
               style: TextStyle(fontSize: 20, color: AppColors.cream),
             ),
 

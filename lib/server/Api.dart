@@ -1,12 +1,13 @@
 import 'package:dio/dio.dart';
+import '../models/flashcard_model.dart';
 
 class Helper{
   final dio = Dio();
 
-  // Future<user_model> getData(String userName) async {
-  //   final response = await dio.get('');
-  //   user_model userModel = user_model.fromJson(response.data);
-  //   return userModel;
-  //
-  // }
+  Future<FlashcardModel> getData(String userName) async {
+    final response = await dio.get('https://opentdb.com/api.php?amount=10&category=18');
+    FlashcardModel flashCard = FlashcardModel.fromJson(response.data);
+    return flashCard;
+
+  }
 }

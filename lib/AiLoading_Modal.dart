@@ -28,7 +28,7 @@ Future<void> showAILoadingModal(BuildContext context) {
                 "Ai is Reading your lecture...",
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: AppColors.creamText,
+                  color: AppColors.navy,
                   fontSize: 15,
                   fontWeight: FontWeight.bold,
                 ),
@@ -39,14 +39,14 @@ Future<void> showAILoadingModal(BuildContext context) {
                 "This might take a few seconds",
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: AppColors.creamText,
+                  color: AppColors.navy,
                   fontSize: 12,
                 ),
               ),
               const SizedBox(height: 32),
 
               const CircularProgressIndicator(
-                color: AppColors.creamText,
+                color: AppColors.navy,
               ),
             ],
           ),

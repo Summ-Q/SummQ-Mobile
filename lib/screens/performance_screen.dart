@@ -120,7 +120,7 @@ class _CandlestickPainter extends CustomPainter {
     for (int i = 0; i < n; i++) {
       final c = candles[i];
       final cx = slotWidth * i + slotWidth / 2;
-      final color = c.isBull ? AppColors.chartGreen : AppColors.chartRed;
+      final color = c.isBull ? AppColors.green : AppColors.chartRed;
       final wickPaint = Paint()
         ..color = color
         ..strokeWidth = 2;
