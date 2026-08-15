@@ -99,7 +99,7 @@ class _HomeTabState extends State<HomeTab> {
                   child: Text(
                     "Let's get things done\n together ✨",
                     textAlign: TextAlign.center,
-                    style: GoogleFonts.openSans(textStyle: TextStyle(fontSize: 20), color: AppColors.grayOrange),
+                    style: GoogleFonts.openSans(textStyle: TextStyle(fontSize: 22,fontWeight: FontWeight.bold), color: AppColors.grayOrange),
                   ),
                 ),
                 const SizedBox(height: 30),
@@ -119,14 +119,20 @@ class _HomeTabState extends State<HomeTab> {
                         const SizedBox(width: 14),
                         Expanded(
                             child: GestureDetector(
-                                  onTap: (){Navigator.push(context,MaterialPageRoute(builder: (context) => const SearchForDeck()),);},
-                                  child:_StatCard(
-                                        color: AppColors.greyCard,
-                                        value: '${StatsController.instance.decksCreated}',
-                                        label: 'Deck created',
-                                        textColor: AppColors.navy,
+                              onTap: (){
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => const SearchForDeck()),
+                                );
+                              },
+                              child: _StatCard(
+                                color: AppColors.subtitleGrey,
+                                value: '${StatsController.instance.decksCreated}',
+                                label: 'Deck created',
+                                textColor: AppColors.navy,
+                              ),
                             ),
-                          ),)
+                          ),
                       ],
                     );
                   },
@@ -155,7 +161,7 @@ class _HomeTabState extends State<HomeTab> {
                   ],
                 ),
                 const SizedBox(height: 26),
-                Text('Your Decks', style: GoogleFonts.poppins( color:AppColors.cream)),
+                Text('Your Decks', style: appFont(color:AppColors.cream, size: 20, weight: FontWeight.bold)),
                 const SizedBox(height: 14),
                 FutureBuilder<List<DeckData>>(
                   future: _decksFuture,
@@ -281,7 +287,7 @@ class _DeckCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
-      decoration: BoxDecoration(color: AppColors.greyCard, borderRadius: BorderRadius.circular(16)),
+      decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(16)),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.start,

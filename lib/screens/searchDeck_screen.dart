@@ -174,7 +174,7 @@ class _SearchDeckCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
-      decoration: BoxDecoration(color: AppColors.greyCard, borderRadius: BorderRadius.circular(16)),
+      decoration: BoxDecoration(color: Colors.white12, borderRadius: BorderRadius.circular(16)),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.start,

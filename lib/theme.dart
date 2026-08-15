@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppColors {
-  static const Color navy = Color(0xFF0E1E45);
+  static const Color navy = Color(0xFF080B22);
   static const Color cream = Color(0xFFEFE6D6);
   static const Color orangCream = Color(0xFFd5bb8b);
   static const Color gold = Color(0xFFE9D9A8);
   static const Color yellowLink = Color(0xFFF2C744);
   static const Color subtitleGrey = Color(0xFFB9C0D4);
   static const Color green = Color(0xFF3FAE4A);
-  static const Color greyCard = Color(0xFF54607D);
+  static const Color greyCard = Color(0xFF54607d);
   static const Color lightBlue = Color(0xFF6FC7E6);
   static const Color yellowCard = Color(0xFFE8C24B);
   static const Color chartRed = Color(0xFFE3543E);
