@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:mobile_flutter/screens/setting_screen.dart';
 import '../theme.dart';
 
 class ProfileTab extends StatelessWidget {
-  const ProfileTab({super.key});
+  const ProfileTab({super.key,});
 
   @override
   Widget build(BuildContext context) {
@@ -12,20 +13,24 @@ class ProfileTab extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
         child: Column(
           children: [
-            Text('profile', style: appFont(size: 24, weight: FontWeight.w800, color: Colors.white)),
-            const SizedBox(height: 40),
             Container(
               width: 110,
               height: 110,
-              decoration: BoxDecoration(color: AppColors.green, shape: BoxShape.circle),
-              child: const Icon(Icons.person_rounded, color: Colors.white, size: 60),
+              decoration: BoxDecoration(color: AppColors.cream, shape: BoxShape.circle),
+              child: const Icon(Icons.person_rounded, color: AppColors.navy, size: 60),
             ),
             const SizedBox(height: 18),
-            Text('mai', style: appFont(size: 22, weight: FontWeight.w800, color: Colors.white)),
-            Text('mai@gmail.com',
+            Text("user", style: appFont(size: 22, weight: FontWeight.w800, color: Colors.white)),
+            Text('email@gmail.com',
                 style: appFont(size: 14, weight: FontWeight.w500, color: AppColors.subtitleGrey)),
             const SizedBox(height: 30),
-            _ProfileRow(icon: Icons.settings_outlined, label: 'Settings'),
+            GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const SettingsScreen()),
+                  );
+                },child: _ProfileRow(icon: Icons.settings_outlined, label: 'Settings')),
             _ProfileRow(icon: Icons.notifications_none_rounded, label: 'Notifications'),
             _ProfileRow(icon: Icons.help_outline_rounded, label: 'Help & Support'),
             _ProfileRow(icon: Icons.logout_rounded, label: 'Log out'),

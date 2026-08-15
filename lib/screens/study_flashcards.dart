@@ -7,7 +7,6 @@ import 'package:flip_card/flip_card.dart';
 import '../widgets/repeted_button.dart';
 
 
-
 class StudyFlashcard extends StatefulWidget {
   const StudyFlashcard({
     super.key,
@@ -170,7 +169,7 @@ class _StudyFlashcardState extends State<StudyFlashcard> {
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
                           foregroundColor: AppColors.yellowLink,
-                          backgroundColor: AppColors.creamText,
+                          backgroundColor: AppColors.navy,
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                         ),
                         onPressed: () {
@@ -184,7 +183,7 @@ class _StudyFlashcardState extends State<StudyFlashcard> {
                 ),
                 back: Container(
                   decoration: BoxDecoration(
-                    color: AppColors.chartGreen,
+                    color: AppColors.green,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   alignment: Alignment.center,
@@ -204,7 +203,7 @@ class _StudyFlashcardState extends State<StudyFlashcard> {
                 children: [
                   GestureDetector(
                     onTap: () => _recordAnswer('Easy'),
-                    child: buildRepetitionButton("Easy", AppColors.chartGreen),
+                    child: buildRepetitionButton("Easy", AppColors.green),
                   ),
                   GestureDetector(
                     onTap: () => _recordAnswer('Immediate'),

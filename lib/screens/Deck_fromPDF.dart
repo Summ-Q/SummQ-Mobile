@@ -25,7 +25,7 @@ Future<void> showDeckModal(BuildContext context) {
               const Text(
                 "Enter deck name ?",
                 style: TextStyle(
-                  color: AppColors.creamText,
+                  color: AppColors.navy,
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
@@ -33,7 +33,7 @@ Future<void> showDeckModal(BuildContext context) {
               SizedBox(height: 5,),
               TextField(
                 controller: deckNameController,
-                style: const TextStyle(color: AppColors.creamText),
+                style: const TextStyle(color: AppColors.navy),
                 decoration: InputDecoration(
                   hintText: "...............................................",
                   filled: true,
@@ -66,13 +66,13 @@ Future<void> showDeckModal(BuildContext context) {
                     // final bytes = await file.readAsBytes();
                   }
                 },
-                icon: const Icon(Icons.upload_file, color: AppColors.creamText),
+                icon: const Icon(Icons.upload_file, color: AppColors.navy),
                 label: Text(
                   selectedFileName ?? "Upload PDF",
-                  style: const TextStyle(color: AppColors.creamText),
+                  style: const TextStyle(color: AppColors.navy),
                 ),
                 style: OutlinedButton.styleFrom(
-                  side: const BorderSide(color: AppColors.creamText),
+                  side: const BorderSide(color: AppColors.navy),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20),
                   ),
@@ -97,7 +97,7 @@ Future<void> showDeckModal(BuildContext context) {
                       showAILoadingModal(context);
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.creamText,
+                      backgroundColor: AppColors.navy,
                       foregroundColor: AppColors.yellowLink,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(20),
@@ -114,7 +114,7 @@ Future<void> showDeckModal(BuildContext context) {
                       Navigator.pop(context);
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.creamText,
+                      backgroundColor: AppColors.navy,
                       foregroundColor: AppColors.cream,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(20),

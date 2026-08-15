@@ -5,7 +5,6 @@ class AppColors {
   static const Color navy = Color(0xFF0E1E45);
   static const Color cream = Color(0xFFEFE6D6);
   static const Color orangCream = Color(0xFFd5bb8b);
-  static const Color creamText = Color(0xFF0E1E45);
   static const Color gold = Color(0xFFE9D9A8);
   static const Color yellowLink = Color(0xFFF2C744);
   static const Color subtitleGrey = Color(0xFFB9C0D4);
@@ -13,18 +12,16 @@ class AppColors {
   static const Color greyCard = Color(0xFF54607D);
   static const Color lightBlue = Color(0xFF6FC7E6);
   static const Color yellowCard = Color(0xFFE8C24B);
-  static const Color chartGreen = Color(0xFF3FAE4A);
   static const Color chartRed = Color(0xFFE3543E);
   static const Color gridBlue = Color(0xFF25376E);
-  static const Color bottomBarBg = Color(0xFFEFE6D6);
-
+  static const Color grayOrange = Color(0xFFc9c0af);
   static ThemeData get lightTheme {
     return ThemeData(
       scaffoldBackgroundColor: navy,
       primaryColor: yellowCard,
 
       textTheme: const TextTheme(
-        bodyLarge: TextStyle(color: bottomBarBg, fontSize: 16),
+        bodyLarge: TextStyle(color: cream, fontSize: 16),
         bodyMedium: TextStyle(color: Colors.white70, fontSize: 14),
       ),
 
@@ -52,7 +49,7 @@ TextStyle appFont({
   Color color = Colors.white,
   double? letterSpacing,
 }) {
-  return GoogleFonts.baloo2(
+  return GoogleFonts.poppins(
     fontSize: size,
     fontWeight: weight,
     color: color,
@@ -90,10 +87,10 @@ class SummQTextField extends StatelessWidget {
           child: TextField(
             controller: controller,
             obscureText: obscure,
-            style: appFont(size: 15, weight: FontWeight.w600, color: AppColors.creamText),
+            style: appFont(size: 15, weight: FontWeight.w600, color: AppColors.navy),
             decoration: InputDecoration(
               hintText: hint,
-              hintStyle: appFont(size: 15, weight: FontWeight.w500, color: AppColors.creamText.withOpacity(0.55)),
+              hintStyle: appFont(size: 15, weight: FontWeight.w500, color: AppColors.navy.withOpacity(0.55)),
               border: InputBorder.none,
               contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
             ),
@@ -122,7 +119,7 @@ class SummQButton extends StatelessWidget {
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
           elevation: 0,
         ),
-        child: Text(text, style: appFont(size: 18, weight: FontWeight.w700, color: AppColors.creamText)),
+        child: Text(text, style: appFont(size: 18, weight: FontWeight.w700, color: AppColors.navy)),
       ),
     );
   }

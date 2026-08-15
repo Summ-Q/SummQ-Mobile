@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_flutter/screens/Deck_fromPDF.dart';
 import 'package:mobile_flutter/screens/paste_note.dart';
+import 'package:mobile_flutter/screens/setting_screen.dart';
 import 'package:mobile_flutter/screens/study_flashcards.dart';
 import 'package:mobile_flutter/models/flashcard_model.dart';
 import '../theme.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 /// TODO: Replace this with a real API call once the backend is ready.
 class DeckRepository {
@@ -79,9 +81,7 @@ class _HomeTabState extends State<HomeTab> {
                     ),
                     GestureDetector(
                       onTap: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Settings coming soon')),
-                        );
+                        Navigator.push(context,MaterialPageRoute(builder: (context) => SettingsScreen(),),);
                       },
                       child: const Icon(Icons.settings_outlined, color: Colors.white, size: 26),
                     ),
@@ -92,7 +92,7 @@ class _HomeTabState extends State<HomeTab> {
                   child: Text(
                     "Let's get things done\n together ✨",
                     textAlign: TextAlign.center,
-                    style: appFont(size: 20, weight: FontWeight.w600, color: AppColors.subtitleGrey),
+                    style: GoogleFonts.openSans(textStyle: TextStyle(fontSize: 20), color: AppColors.grayOrange),
                   ),
                 ),
                 const SizedBox(height: 30),
@@ -100,7 +100,7 @@ class _HomeTabState extends State<HomeTab> {
                   children: [
                     Expanded(
                       child: _StatCard(
-                          color: AppColors.green, value: '23', label: 'studied cards', textColor: Colors.white),
+                          color: AppColors.greyCard, value: '23', label: 'studied cards', textColor: Colors.white),
                     ),
                     const SizedBox(width: 14),
                     Expanded(
@@ -133,7 +133,7 @@ class _HomeTabState extends State<HomeTab> {
                   ],
                 ),
                 const SizedBox(height: 26),
-                Text('Your Decks', style: appFont(size: 20, weight: FontWeight.w700, color: Colors.white)),
+                Text('Your Decks', style: GoogleFonts.poppins( color:AppColors.cream)),
                 const SizedBox(height: 14),
                 FutureBuilder<List<DeckData>>(
                   future: _decksFuture,
@@ -168,8 +168,8 @@ class _HomeTabState extends State<HomeTab> {
                     }
 
                     return Column(
-                      children: decks
-                          .map((d) => Padding(
+                      children:
+                      decks.map((d) => Padding(
                         padding: const EdgeInsets.only(bottom: 14),
                         child: GestureDetector(
                           onTap: () {
