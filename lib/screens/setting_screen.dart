@@ -99,7 +99,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
           Center(
             child: TextButton(
               onPressed: () {
-                // TODO: Add logic to delete account
               },
               child: Text(
                 'Delete Account',

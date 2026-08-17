@@ -6,31 +6,12 @@ import 'package:mobile_flutter/screens/setting_screen.dart';
 import 'package:mobile_flutter/screens/study_flashcards.dart';
 import 'package:mobile_flutter/models/flashcard_model.dart';
 import '../cubit/stats_controller.dart';
+import '../providers/Auth_provider.dart';
+import '../providers/Deck_provider.dart';
+import '../server/Api.dart';
 import '../theme.dart';
 import 'package:google_fonts/google_fonts.dart';
-
-class DeckRepository {
-  static Future<List<DeckData>> fetchDecks() async {
-    await Future.delayed(const Duration(milliseconds: 400)); // simulate network
-    return const [
-      DeckData(id: 1, title: 'logic', subtitle: 'Fundamentals of ...', progress: '12/30'),
-      DeckData(id: 2, title: 'Hardware', subtitle: 'Fundamentals of ...', progress: '10/12'),
-      DeckData(id: 2, title: 'Math3', subtitle: 'Fundamentals of ...', progress: '0/10'),
-      DeckData(id: 2, title: 'physics', subtitle: 'Fundamentals of ...', progress: '0/10'),
-    ];
-  }
-
-  static List<FlashcardModel> mockCardsFor(DeckData deck) {
-    return List.generate(10, (i) => FlashcardModel(
-        id: i,
-        deckId: deck.id,
-        question: 'Sample question ${i + 1} for "${deck.title}"',
-        answer: 'Sample answer ${i + 1}',
-        difficultyLevel: 'medium',
-      ),
-    );
-  }
-}
+import 'package:provider/provider.dart';
 
 class HomeTab extends StatefulWidget {
   const HomeTab({super.key});
@@ -40,84 +21,100 @@ class HomeTab extends StatefulWidget {
 }
 
 class _HomeTabState extends State<HomeTab> {
-  final String userName = 'mai';
-  late Future<List<DeckData>> _decksFuture;
-
   @override
   void initState() {
     super.initState();
-    _decksFuture = DeckRepository.fetchDecks().then((decks) {
-      StatsController.instance.setDecksCreated(decks.length);
-      return decks;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<DeckProvider>().fetchDecks();
     });
   }
 
   Future<void> _refreshDecks() async {
-    setState(() {
-      _decksFuture = DeckRepository.fetchDecks().then((decks) {
-        StatsController.instance.setDecksCreated(decks.length);
-        return decks;
-      });
-    });
-    await _decksFuture;
+    await context.read<DeckProvider>().fetchDecks();
+
+    final decksCount = context.read<DeckProvider>().decks.length;
+    StatsController.instance.setDecksCreated(decksCount);
+  }
+
+  Future<void> _openDeck(DeckData deck) async {
+    try {
+      final cards = await ApiService().getCardsForDeck(deck.id);
+      if (!mounted) return;
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => StudyFlashcard(
+            deckTitle: deck.title,
+            flashcards: cards,
+          ),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to load cards: $e')),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final authProvider = context.watch<AuthProvider>();
+    final String userName = authProvider.currentUser?.name ?? 'User';
     return SafeArea(
-      bottom: false,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
-        child: RefreshIndicator(
-          onRefresh: _refreshDecks,
-          child: SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Welcome back,',
-                            style: appFont(size: 20, weight: FontWeight.w700, color: AppColors.yellowLink)),
-                        Text(userName, style: appFont(size: 26, weight: FontWeight.w800, color: Colors.white)),
-                      ],
-                    ),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.push(context,MaterialPageRoute(builder: (context) => SettingsScreen(),),);
-                      },
-                      child: const Icon(Icons.settings_outlined, color: Colors.white, size: 26),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 30),
-                Center(
-                  child: Text(
-                    "Let's get things done\n together ✨",
-                    textAlign: TextAlign.center,
-                    style: GoogleFonts.openSans(textStyle: TextStyle(fontSize: 22,fontWeight: FontWeight.bold), color: AppColors.grayOrange),
+        bottom: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
+          child: RefreshIndicator(
+            onRefresh: _refreshDecks,
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Welcome back,',
+                              style: appFont(size: 20, weight: FontWeight.w700, color: AppColors.yellowLink)),
+                          Text(userName, style: appFont(size: 26, weight: FontWeight.w800, color: Colors.white)),
+                        ],
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.push(context,MaterialPageRoute(builder: (context) => const SettingsScreen(),),);
+                        },
+                        child: const Icon(Icons.settings_outlined, color: Colors.white, size: 26),
+                      ),
+                    ],
                   ),
-                ),
-                const SizedBox(height: 30),
-                ListenableBuilder(
-                  listenable: StatsController.instance,
-                  builder: (context, _) {
-                    return Row(
-                      children: [
-                        Expanded(
-                          child: _StatCard(
-                            color: AppColors.greyCard,
-                            value: '${StatsController.instance.studiedCards}',
-                            label: 'studied cards',
-                            textColor: Colors.white,
+                  const SizedBox(height: 30),
+                  Center(
+                    child: Text(
+                      "Let's get things done\n together ✨",
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.openSans(textStyle: const TextStyle(fontSize: 22,fontWeight: FontWeight.bold), color: AppColors.subtitleGrey),
+                    ),
+                  ),
+                  const SizedBox(height: 30),
+                  ListenableBuilder(
+                    listenable: StatsController.instance,
+                    builder: (context, _) {
+                      return Row(
+                        children: [
+                          Expanded(
+                            child: _StatCard(
+                              color: AppColors.greyCard,
+                              value: '${StatsController.instance.studiedDecksCount}',
+                              label: 'studied decks',
+                              textColor: Colors.white,
+                            ),
                           ),
-                        ),
-                        const SizedBox(width: 14),
-                        Expanded(
+                          const SizedBox(width: 14),
+                          Expanded(
                             child: GestureDetector(
                               onTap: (){
                                 Navigator.push(
@@ -126,109 +123,85 @@ class _HomeTabState extends State<HomeTab> {
                                 );
                               },
                               child: _StatCard(
-<<<<<<< HEAD
                                 color: AppColors.subtitleGrey,
-=======
-                                color: AppColors.greyCard,
->>>>>>> 5ed731d0ab94ff990f4943743f7861132eb0ba15
                                 value: '${StatsController.instance.decksCreated}',
                                 label: 'Deck created',
                                 textColor: AppColors.navy,
                               ),
                             ),
                           ),
-                      ],
-                    );
-                  },
-                ),
-                const SizedBox(height: 14),
-                Row(
-                  children: [
-                    Expanded(
-                      child: GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) => const PasteScreen()),
-                            );
-                          },
-                          child: _IconCard(color: AppColors.lightBlue, icon: Icons.edit_note_rounded)),
-                    ),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: GestureDetector(
-                          onTap: () {
-                            showDeckModal(context);
-                          },
-                          child: _IconCard(color: AppColors.yellowCard, icon: Icons.note_add_rounded)),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 26),
-                Text('Your Decks', style: appFont(color:AppColors.cream, size: 20, weight: FontWeight.bold)),
-                const SizedBox(height: 14),
-                FutureBuilder<List<DeckData>>(
-                  future: _decksFuture,
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 40),
-                        child: Center(child: CircularProgressIndicator(color: AppColors.yellowLink)),
+                        ],
                       );
-                    }
-
-                    if (snapshot.hasError) {
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 24),
-                        child: Text(
-                          "Couldn't load your decks. Pull down to try again.",
-                          style: appFont(size: 14, weight: FontWeight.w500, color: AppColors.subtitleGrey),
-                        ),
-                      );
-                    }
-
-                    final decks = snapshot.data ?? [];
-
-                    if (decks.isEmpty) {
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 24),
-                        child: Text(
-                          "No decks yet — create one above to get started.",
-                          style: appFont(size: 14, weight: FontWeight.w500, color: AppColors.subtitleGrey),
-                        ),
-                      );
-                    }
-
-                    return Column(
-                      children:
-                      decks.map((d) => Padding(
-                        padding: const EdgeInsets.only(bottom: 14),
+                    },
+                  ),
+                  const SizedBox(height: 14),
+                  Row(
+                    children: [
+                      Expanded(
                         child: GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => StudyFlashcard(
-                                  deckTitle: d.title,
-                                  flashcards: DeckRepository.mockCardsFor(d),
-                                ),
-                              ),
-                            );
-                          },
-                          child: _DeckCard(data: d),
-                        ),
-                      ))
-                          .toList(),
-                    );
-                  },
-                ),
-                const SizedBox(height: 100),
-              ],
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => const PasteScreen()),
+                              );
+                            },
+                            child: const _IconCard(color: AppColors.lightBlue, icon: Icons.edit_note_rounded)),
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: GestureDetector(
+                            onTap: () {
+                              showDeckModal(context);
+                            },
+                            child: const _IconCard(color: AppColors.yellowCard, icon: Icons.note_add_rounded)),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 26),
+                  Text('Your Decks', style: appFont(color:AppColors.cream, size: 20, weight: FontWeight.bold)),
+                  const SizedBox(height: 14),
+
+                  Consumer<DeckProvider>(
+                    builder: (context, deckProvider, child) {
+                      if (deckProvider.isLoading) {
+                        return const Padding(
+                          padding: EdgeInsets.only(top: 40),
+                          child: Center(child: CircularProgressIndicator(color: AppColors.yellowLink)),
+                        );
+                      }
+
+                      if (deckProvider.decks.isEmpty) {
+                        return const Padding(
+                          padding: EdgeInsets.only(top: 40),
+                          child: Center(child: Text("No decks yet. Create one!", style: TextStyle(color: Colors.white54))),
+                        );
+                      }
+
+                      return Column(
+                        children: deckProvider.decks.map((deck) {
+                          final deckData = DeckData(
+                            id: deck.id,
+                            title: deck.title,
+                            subtitle: 'Created at ${deck.createdAt.day}/${deck.createdAt.month}',
+                            progress: 'Ready',
+                          );
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 14),
+                            child: GestureDetector(
+                              onTap: () => _openDeck(deckData),
+                              child: _DeckCard(data: deckData),
+                            ),
+                          );
+                        }).toList(),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 100),
+                ],
+              ),
             ),
           ),
-        ),
-      ),
-    );
+        ));
   }
 }
 

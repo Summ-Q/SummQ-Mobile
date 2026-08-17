@@ -4,7 +4,9 @@ import 'package:mobile_flutter/models/flashcard_model.dart';
 import 'package:mobile_flutter/screens/session_complete.dart';
 import 'package:mobile_flutter/theme.dart';
 import 'package:flip_card/flip_card.dart';
+import 'package:provider/provider.dart';
 import '../cubit/stats_controller.dart';
+import '../providers/Study_provider.dart';
 import '../widgets/repeted_button.dart';
 
 
@@ -27,6 +29,13 @@ class _StudyFlashcardState extends State<StudyFlashcard> {
   int currentIndex = 0;
   final FlipCardController _controller = FlipCardController();
 
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<StudyProvider>().loadCards(widget.flashcards);
+    });
+  }
+
   FlashcardModel get currentCard => widget.flashcards[currentIndex];
   int get totalQuestions => widget.flashcards.length;
 
@@ -35,10 +44,9 @@ class _StudyFlashcardState extends State<StudyFlashcard> {
       setState(() {
         currentIndex++;
         isPressed = false;
-       // _controller.flip(CardSide.front);
       });
     } else {
-      StatsController.instance.addStudiedCards(totalQuestions); // <-- add this
+      StatsController.instance.markDeckAsStudied(totalQuestions);
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
@@ -53,14 +61,31 @@ class _StudyFlashcardState extends State<StudyFlashcard> {
       setState(() {
         currentIndex--;
         isPressed = false;
-       // _controller.flip(CardSide.front);
       });
     }
   }
 
-  void _recordAnswer(String label) {
-    // TODO: send review result (Easy/Immediate/Hard) to backend once ready
-    _goNext();
+  void _recordAnswer(int label) async {
+    final studyProvider = context.read<StudyProvider>();
+
+    final isComplete = await studyProvider.submitAnswer(label);
+
+    if (isComplete) {
+      StatsController.instance.markDeckAsStudied(totalQuestions);
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => SessionComplete(totalQuestions: totalQuestions),
+          ),
+        );
+      }
+    } else {
+      setState(() {
+        currentIndex = studyProvider.currentIndex;
+        isPressed = false;
+      });
+    }
   }
 
   @override
@@ -135,7 +160,7 @@ class _StudyFlashcardState extends State<StudyFlashcard> {
 
             Expanded(
               child: FlipCard(
-                key: ValueKey(currentCard.id),
+                key: ValueKey(currentCard.card_id),
                 fill: Fill.fillBack,
                 controller: _controller,
                 flipOnTouch: false,
@@ -203,17 +228,20 @@ class _StudyFlashcardState extends State<StudyFlashcard> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  GestureDetector(
-                    onTap: () => _recordAnswer('Easy'),
-                    child: buildRepetitionButton("Easy", AppColors.green),
+                  buildRepetitionButton(
+                    label: "Easy",
+                    color: AppColors.green,
+                    onPressed: () => _recordAnswer(1),
                   ),
-                  GestureDetector(
-                    onTap: () => _recordAnswer('Immediate'),
-                    child: buildRepetitionButton("Immediate", AppColors.yellowCard),
+                  buildRepetitionButton(
+                    label: "Immediate",
+                    color: AppColors.yellowCard,
+                    onPressed: () => _recordAnswer(2),
                   ),
-                  GestureDetector(
-                    onTap: () => _recordAnswer('Hard'),
-                    child: buildRepetitionButton("Hard", AppColors.chartRed),
+                  buildRepetitionButton(
+                    label: "Hard",
+                    color: AppColors.chartRed,
+                    onPressed: () => _recordAnswer(3),
                   ),
                 ],
               ),

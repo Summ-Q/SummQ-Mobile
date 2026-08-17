@@ -1,14 +1,15 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 
-Widget buildRepetitionButton(String label, Color color) {
+Widget buildRepetitionButton({
+  required String label,
+  required Color color,
+  required VoidCallback onPressed,
+}) {
   return ElevatedButton(
-    onPressed: () {
-      // TODO: Send data to Laravel & DS Python script here!
-    },
+    onPressed: onPressed,
     style: ElevatedButton.styleFrom(
-      backgroundColor: color.withOpacity(0.2), // Semi-transparent background
-      foregroundColor: color, // Text color matches the difficulty
+      backgroundColor: color.withOpacity(0.2),
+      foregroundColor: color,
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),

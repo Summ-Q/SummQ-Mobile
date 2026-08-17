@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:mobile_flutter/screens/home_screen.dart';
 import 'package:mobile_flutter/screens/study_flashcards.dart';
+import 'package:provider/provider.dart';
+import '../providers/Deck_provider.dart';
+import '../server/Api.dart';
 import '../theme.dart';
+import 'home_screen.dart';
 
 class SearchForDeck extends StatefulWidget {
   const SearchForDeck({super.key});
@@ -12,20 +15,16 @@ class SearchForDeck extends StatefulWidget {
 
 class _SearchForDeckState extends State<SearchForDeck> {
   final TextEditingController _searchController = TextEditingController();
-
-  late Future<List<DeckData>> _decksFuture;
-  List<DeckData> _allDecks = [];
-  List<DeckData> _filteredDecks = [];
   String _query = '';
 
   @override
   void initState() {
     super.initState();
-    _decksFuture = DeckRepository.fetchDecks().then((decks) {
-      _allDecks = decks;
-      _filteredDecks = decks;
-      return decks;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<DeckProvider>().fetchDecks();
     });
+
     _searchController.addListener(_onSearchChanged);
   }
 
@@ -37,20 +36,24 @@ class _SearchForDeckState extends State<SearchForDeck> {
   }
 
   void _onSearchChanged() {
-    final query = _searchController.text.trim().toLowerCase();
     setState(() {
-      _query = query;
-      _filteredDecks = query.isEmpty
-          ? _allDecks
-          : _allDecks.where((deck) {
-        return deck.title.toLowerCase().contains(query) ||
-            deck.subtitle.toLowerCase().contains(query);
-      }).toList();
+      _query = _searchController.text.trim().toLowerCase();
     });
   }
 
   void _clearSearch() {
     _searchController.clear();
+  }
+
+  List<DeckData> _toDeckData(List decks) {
+    return decks
+        .map((deck) => DeckData(
+      id: deck.id,
+      title: deck.title,
+      subtitle: 'Created ${deck.createdAt.day}/${deck.createdAt.month}',
+      progress: 'Ready',
+    ))
+        .toList();
   }
 
   @override
@@ -114,23 +117,22 @@ class _SearchForDeckState extends State<SearchForDeck> {
   }
 
   Widget _buildDeckList() {
-    return FutureBuilder<List<DeckData>>(
-      future: _decksFuture,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
+    return Consumer<DeckProvider>(
+      builder: (context, deckProvider, child) {
+        if (deckProvider.isLoading) {
           return const Center(child: CircularProgressIndicator(color: AppColors.yellowLink));
         }
 
-        if (snapshot.hasError) {
-          return Center(
-            child: Text(
-              "Couldn't load decks.",
-              style: appFont(size: 14, weight: FontWeight.w500, color: AppColors.subtitleGrey),
-            ),
-          );
-        }
+        final allDecks = _toDeckData(deckProvider.decks);
+        final filteredDecks = _query.isEmpty
+            ? allDecks
+            : allDecks
+            .where((deck) =>
+        deck.title.toLowerCase().contains(_query) ||
+            deck.subtitle.toLowerCase().contains(_query))
+            .toList();
 
-        if (_filteredDecks.isEmpty) {
+        if (filteredDecks.isEmpty) {
           return Center(
             child: Text(
               _query.isEmpty ? "No decks yet." : 'No decks match "$_query"',
@@ -141,21 +143,30 @@ class _SearchForDeckState extends State<SearchForDeck> {
         }
 
         return ListView.separated(
-          itemCount: _filteredDecks.length,
+          itemCount: filteredDecks.length,
           separatorBuilder: (context, index) => const SizedBox(height: 14),
           itemBuilder: (context, index) {
-            final deck = _filteredDecks[index];
+            final deck = filteredDecks[index];
             return GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => StudyFlashcard(
-                      deckTitle: deck.title,
-                      flashcards: DeckRepository.mockCardsFor(deck),
+              onTap: () async {
+                try {
+                  final cards = await ApiService().getCardsForDeck(deck.id);
+                  if (!mounted) return;
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => StudyFlashcard(
+                        deckTitle: deck.title,
+                        flashcards: cards,
+                      ),
                     ),
-                  ),
-                );
+                  );
+                } catch (e) {
+                  if (!mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Failed to load cards: $e')),
+                  );
+                }
               },
               child: _SearchDeckCard(data: deck),
             );

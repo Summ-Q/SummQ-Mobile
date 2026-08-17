@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../server/Api.dart';
 import '../theme.dart';
 
 class PerformanceTab extends StatefulWidget {
@@ -9,7 +10,27 @@ class PerformanceTab extends StatefulWidget {
 }
 
 class _PerformanceTabState extends State<PerformanceTab> {
-  double level = 0.85;
+  double level = 0.0;
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchRetention();
+  }
+
+  Future<void> _fetchRetention() async {
+    try {
+      final retentionScore = await ApiService().predictRetention(1);
+      setState(() {
+        level = retentionScore;
+        isLoading = false;
+      });
+    } catch (e) {
+      setState(() => isLoading = false);
+      debugPrint('Failed to load retention: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

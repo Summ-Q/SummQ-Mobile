@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_flutter/screens/setting_screen.dart';
+import 'package:provider/provider.dart';
+import '../providers/Auth_provider.dart';
 import '../theme.dart';
 
 class ProfileTab extends StatelessWidget {
@@ -7,6 +9,9 @@ class ProfileTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final authProvider = context.watch<AuthProvider>();
+    final String userName = authProvider.currentUser?.name ?? 'User';
+    final String email = authProvider.currentUser?.email ?? 'email@gmail.com';
     return SafeArea(
       bottom: false,
       child: Padding(
@@ -16,12 +21,12 @@ class ProfileTab extends StatelessWidget {
             Container(
               width: 110,
               height: 110,
-              decoration: BoxDecoration(color: AppColors.cream, shape: BoxShape.circle),
+              decoration: BoxDecoration(color: AppColors.green, shape: BoxShape.circle),
               child: const Icon(Icons.person_rounded, color: AppColors.navy, size: 60),
             ),
             const SizedBox(height: 18),
-            Text("user", style: appFont(size: 22, weight: FontWeight.w800, color: Colors.white)),
-            Text('email@gmail.com',
+            Text(userName, style: appFont(size: 22, weight: FontWeight.w800, color: AppColors.yellowCard)),
+            Text(email,
                 style: appFont(size: 14, weight: FontWeight.w500, color: AppColors.subtitleGrey)),
             const SizedBox(height: 30),
             GestureDetector(

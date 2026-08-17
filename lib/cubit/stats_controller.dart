@@ -1,27 +1,48 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class StatsController extends ChangeNotifier {
-  StatsController._internal();
   static final StatsController instance = StatsController._internal();
 
-  int _studiedCards = 0;
+  StatsController._internal() {
+    _loadSavedData();
+  }
+
+  Set<int> _studiedDeckIds = {};
   int _decksCreated = 0;
 
-  int get studiedCards => _studiedCards;
+  int get studiedDecksCount => _studiedDeckIds.length;
   int get decksCreated => _decksCreated;
 
-  void addStudiedCards(int count) {
-    _studiedCards += count;
+  Future<void> _loadSavedData() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    _decksCreated = prefs.getInt('decks_created') ?? 0;
+
+    final List<String>? savedIds = prefs.getStringList('studied_decks');
+    if (savedIds != null) {
+      _studiedDeckIds = savedIds.map((id) => int.parse(id)).toSet();
+    }
+
     notifyListeners();
   }
 
-  void incrementDecksCreated() {
-    _decksCreated++;
-    notifyListeners();
+  Future<void> markDeckAsStudied(int deckId) async {
+    if (!_studiedDeckIds.contains(deckId)) {
+      _studiedDeckIds.add(deckId);
+      notifyListeners();
+
+      final prefs = await SharedPreferences.getInstance();
+      final List<String> stringIds = _studiedDeckIds.map((id) => id.toString()).toList();
+      await prefs.setStringList('studied_decks', stringIds);
+    }
   }
 
-  void setDecksCreated(int count) {
+  Future<void> setDecksCreated(int count) async {
     _decksCreated = count;
     notifyListeners();
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('decks_created', count);
   }
 }

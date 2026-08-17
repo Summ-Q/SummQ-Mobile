@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_flutter/screens/study_flashcards.dart';
-
+import 'package:provider/provider.dart';
 import '../AiLoading_Modal.dart';
-import '../models/flashcard_model.dart';
+import '../providers/Deck_provider.dart';
+import '../server/Api.dart';
 import '../theme.dart';
 
 class PasteScreen extends StatefulWidget {
@@ -117,65 +118,64 @@ class _PasteNotesScreenState extends State<PasteScreen> {
       width: double.infinity,
       height: 56,
       child: ElevatedButton(
-        onPressed: () async {
-          final deckName = _deckNameController.text.trim().isEmpty
-              ? 'Untitled Deck'
-              : _deckNameController.text.trim();
+        onPressed: ()async {
+          final deckName = _deckNameController.text.trim();
           final notes = _notesController.text.trim();
 
-          if (notes.isEmpty) {
+          if (deckName.isEmpty || notes.isEmpty) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Paste some notes first')),
-            );
-            return;
+            const SnackBar(content: Text('Please enter a deck name and your notes.')),
+          );
+          return;
           }
 
           showAILoadingModal(context);
 
-          // TODO: replace with real API call once backend is ready
-          final cards = await _mockGenerateFlashcards(deckName, notes);
+          try {
+            final newDeck = await ApiService().createDeck(title: deckName);
 
-          if (!context.mounted) return;
-          Navigator.pop(context); // dismiss loading modal
-
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => StudyFlashcard(deckTitle: deckName, flashcards: [],),
-            ),
+            final generatedCards = await ApiService().generateFlashcards(
+            deckId: newDeck.id,
+            notes: notes
           );
+
+            if (mounted) {
+            context.read<DeckProvider>().fetchDecks();
+
+            Navigator.pop(context);
+
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => StudyFlashcard(
+            deckTitle: newDeck.title,
+            flashcards: generatedCards,
+              ),
+            ),
+            );
+          }
+        } catch (e) {
+            if (mounted) {
+            Navigator.pop(context);
+            ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Failed to generate cards: $e')),
+            );
+          }
+        }
         },
         style: ElevatedButton.styleFrom(
-        backgroundColor: AppColors.yellowCard,
-        shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-        ),
-        ),
-        child: const Text(
-        "🪄 Generate Flashcards",
-        style: TextStyle(
-          color: AppColors.navy,
-          fontSize: 20,
-          fontWeight: FontWeight.bold,
+          backgroundColor: AppColors.yellowCard,
+          shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
           ),
         ),
+        child: const Text("🪄 Generate Flashcards",
+          style: TextStyle(
+          color: AppColors.navy,
+          fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),),
       ),
       ),
       const SizedBox(height: 10),
-      ],
-      ),
-      ),
-      );
-    }
-  }
-
-Future<List<FlashcardModel>> _mockGenerateFlashcards(String deckName, String notes) async {
-  await Future.delayed(const Duration(seconds: 2)); // simulate network
-  return List.generate(5, (i) => FlashcardModel(
-    id: i,
-    deckId: 0,
-    question: 'Sample question ${i + 1} from "$deckName"',
-    answer: 'Sample answer ${i + 1}',
-    difficultyLevel: 'medium',
-  ));
-}
+      ]),
+    ),
+  );
+}}

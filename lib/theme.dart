@@ -62,13 +62,17 @@ class SummQTextField extends StatelessWidget {
   final String hint;
   final bool obscure;
   final TextEditingController? controller;
+  final TextInputType keyboardType;
+  final String? Function(String?)? validator;
 
   const SummQTextField({
     super.key,
     required this.label,
     required this.hint,
     this.obscure = false,
-    this.controller, required TextInputType keyboardType, required String? Function(String?) validator,
+    this.controller,
+    this.keyboardType = TextInputType.text,
+    this.validator,
   });
 
   @override
@@ -79,14 +83,15 @@ class SummQTextField extends StatelessWidget {
         Text(label, style: appFont(size: 15, weight: FontWeight.w600, color: Colors.white)),
         const SizedBox(height: 8),
         Container(
-          height: 52,
           decoration: BoxDecoration(
             color: AppColors.cream,
             borderRadius: BorderRadius.circular(30),
           ),
-          child: TextField(
+          child: TextFormField(
             controller: controller,
             obscureText: obscure,
+            keyboardType: keyboardType,
+            validator: validator,
             style: appFont(size: 15, weight: FontWeight.w600, color: AppColors.navy),
             decoration: InputDecoration(
               hintText: hint,

@@ -3,6 +3,8 @@ import '../theme.dart';
 import '../utils/page_transitions.dart';
 import '../utils/validator.dart';
 import 'main_screen.dart';
+import 'package:provider/provider.dart';
+import '../providers/Auth_provider.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -13,6 +15,7 @@ class SignUpScreen extends StatefulWidget {
 
 class _SignUpScreenState extends State<SignUpScreen> {
   final _formKey = GlobalKey<FormState>();
+  bool _isLoading = false;
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -27,11 +30,30 @@ class _SignUpScreenState extends State<SignUpScreen> {
     super.dispose();
   }
 
-  void _submit() {
+  void _submit() async {
     if (_formKey.currentState?.validate() ?? false) {
-      Navigator.of(context).pushReplacement(
-        smoothRoute(const MainScreen(), direction: SlideDirection.up),
-      );
+      setState(() => _isLoading = true);
+
+      try {
+        await context.read<AuthProvider>().register(
+          _nameController.text.trim(),
+          _emailController.text.trim(),
+          _passwordController.text,
+          _confirmController.text,
+        );
+
+        if (mounted) {
+          Navigator.of(context).pushReplacement(
+            smoothRoute(const MainScreen(), direction: SlideDirection.up),
+          );
+        }
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.toString())),
+        );
+      } finally {
+        if (mounted) setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -50,9 +72,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
               children: [
                 const SizedBox(height: 50),
                 Center(
-                  child: Text(
-                    'SummQ',
-                    style: appFont(size: 42, weight: FontWeight.w800, color: AppColors.gold),
+                  child: Text('SummQ',
+                    style: appFont(size: 50, weight: FontWeight.w800, color: AppColors.gold),
                   ),
                 ),
                 const SizedBox(height: 40),
@@ -60,7 +81,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   child: Text(
                     'Create new\nAccount',
                     textAlign: TextAlign.center,
-                    style: appFont(size: 30, weight: FontWeight.w800, color: AppColors.gold),
+                    style: appFont(size: 25, weight: FontWeight.w800, color: AppColors.gold),
                   ),
                 ),
                 const SizedBox(height: 34),
@@ -95,7 +116,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   validator: Validators.confirmPassword(() => _passwordController.text), keyboardType: TextInputType.text,
                 ),
                 const SizedBox(height: 30),
-                SummQButton(text: 'Sign up', onTap: _submit),
+                _isLoading
+                    ? const Center(child: CircularProgressIndicator(color: AppColors.yellowLink))
+                    : SummQButton(text: 'Sign up', onTap: _submit),
                 const SizedBox(height: 40),
               ],
             ),

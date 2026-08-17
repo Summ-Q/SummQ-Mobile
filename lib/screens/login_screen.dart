@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart';
+import 'package:provider/provider.dart';
+import '../providers/Auth_provider.dart';
 import '../theme.dart';
 import '../utils/page_transitions.dart';
 import '../utils/validator.dart';
@@ -14,6 +17,7 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
+  bool _isLoading = false;
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
@@ -24,13 +28,31 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  void _submit() {
+  void _submit() async {
     if (_formKey.currentState?.validate() ?? false) {
-      Navigator.of(context).pushReplacement(
-        smoothRoute(const MainScreen(), direction: SlideDirection.up),
-      );
+      setState(() => _isLoading = true);
+
+      try {
+        await context.read<AuthProvider>().login(
+          _emailController.text.trim(),
+          _passwordController.text,
+        );
+
+        if (mounted) {
+          Navigator.of(context).pushReplacement(
+            smoothRoute(const MainScreen(), direction: SlideDirection.up),
+          );
+        }
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.toString())),
+        );
+      } finally {
+        if (mounted) setState(() => _isLoading = false);
+      }
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -47,12 +69,11 @@ class _LoginScreenState extends State<LoginScreen> {
               children: [
                 const SizedBox(height: 60),
                 Center(
-                  child: Text(
-                    'SummQ',
-                    style: appFont(size: 46, weight: FontWeight.w800, color: AppColors.gold),
+                  child: Text('SummQ',
+                    style: appFont(size: 50, weight: FontWeight.w800, color: AppColors.gold),
                   ),
                 ),
-                const SizedBox(height: 60),
+                const SizedBox(height: 55),
                 Center(
                   child: Text(
                     'Login',
@@ -83,7 +104,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   validator: Validators.password, keyboardType: TextInputType.text,
                 ),
                 const SizedBox(height: 34),
-                SummQButton(text: 'Sign in', onTap: _submit),
+                _isLoading
+                    ? const Center(child: CircularProgressIndicator(color: AppColors.yellowLink))
+                    : SummQButton(text: 'Sign in', onTap: _submit),
                 const SizedBox(height: 16),
                 GestureDetector(
                   onTap: () {
