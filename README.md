@@ -20,7 +20,7 @@ The app is designed around a simple loop:
 - 👤 **Profile & settings** — manage account info, notifications, study reminders, and dark mode toggle.
 - 🧭 **Custom animated bottom navigation** — smooth notch-style tab bar switching between Performance, Home, and Profile.
 
---------------------------------------
+------------------------------------------
 
 ## 🛠️ Tech Stack
 
