@@ -91,13 +91,6 @@ Future<void> showDeckModal(BuildContext context) {
                               return;
                             }
                             Navigator.pop(context);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                  "PDF import is coming soon — use 'Paste Notes' for now.",
-                                ),
-                              ),
-                            );
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.navy,

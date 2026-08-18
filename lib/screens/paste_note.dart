@@ -133,7 +133,6 @@ class _PasteNotesScreenState extends State<PasteScreen> {
 
           try {
             final newDeck = await ApiService().createDeck(title: deckName);
-
             final generatedCards = await ApiService().generateFlashcards(
             deckId: newDeck.id,
             notes: notes

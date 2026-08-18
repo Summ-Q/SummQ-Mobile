@@ -7,7 +7,7 @@ import '../models/decks_model.dart';
 import '../models/flashcard_model.dart';
 
 class ApiService {
-  static const String baseUrl = 'https://summ-q-laraval-api.vercel.app/my-api';
+  static const String baseUrl = 'https://6cf2-156-210-32-131.ngrok-free.app/my-api';
 
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
 
@@ -15,6 +15,8 @@ class ApiService {
     final headers = {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
+      'Connection': 'close',
+      'ngrok-skip-browser-warning': 'true'
     };
 
     if (requiresAuth) {
@@ -101,7 +103,6 @@ class ApiService {
         headers: headers,
       );
     } catch (_) {
-      // Continue clearing local token even if network fails
     } finally {
       await _storage.delete(key: 'auth_token');
     }
@@ -133,7 +134,7 @@ class ApiService {
       Uri.parse('$baseUrl/decks'),
       headers: headers,
       body: jsonEncode({
-        'title': title,
+        'name': title,
       }),
     );
 
@@ -160,11 +161,14 @@ class ApiService {
 
   /// POST /api/decks/{deck_id}/generate
   /// Generates flashcards via Python GenAI from text notes
+  /// POST /api/decks/{deck_id}/generate
   Future<List<FlashcardModel>> generateFlashcards({
     required int deckId,
     required String notes,
   }) async {
+
     final headers = await _getHeaders(requiresAuth: true);
+
     final response = await http.post(
       Uri.parse('$baseUrl/decks/$deckId/generate'),
       headers: headers,
@@ -175,12 +179,35 @@ class ApiService {
 
     if (response.statusCode == 200 || response.statusCode == 201) {
       final dynamic decoded = jsonDecode(response.body);
+
       final List<dynamic> list = decoded is List ? decoded : (decoded['cards'] ?? decoded['data'] ?? []);
       return list.map((json) => FlashcardModel.fromJson(json)).toList();
+
     } else {
-      throw Exception('Failed to generate flashcards from notes');
+      throw Exception('Failed to generate flashcards: ${response.body}');
     }
   }
+  // Future<List<FlashcardModel>> generateFlashcards({
+  //   required int deckId,
+  //   required String notes,
+  // }) async {
+  //   final headers = await _getHeaders(requiresAuth: true);
+  //   final response = await http.post(
+  //     Uri.parse('$baseUrl/decks/$deckId/generate'),
+  //     headers: headers,
+  //     body: jsonEncode({
+  //       'notes': notes,
+  //     }),
+  //   );
+  //
+  //   if (response.statusCode == 200 || response.statusCode == 201) {
+  //     final dynamic decoded = jsonDecode(response.body);
+  //     final List<dynamic> list = decoded is List ? decoded : (decoded['cards'] ?? decoded['data'] ?? []);
+  //     return list.map((json) => FlashcardModel.fromJson(json)).toList();
+  //   } else {
+  //      throw Exception('Failed to generate flashcards from notes');
+  //   }
+  // }
 
   /// GET /api/decks/{deck_id}/cards
   /// Retrieves all flashcards inside a deck
@@ -244,7 +271,7 @@ class ApiService {
       Uri.parse('$baseUrl/reviews/$flashcardId'),
       headers: headers,
       body: jsonEncode({
-        'difficulty': difficulty, // sending 1='easy', 2='immediate', or 3='hard'
+        'score': difficulty, // sending 1='easy', 2='immediate', or 3='hard'
       }),
     );
 
@@ -262,7 +289,7 @@ class ApiService {
     final response = await http.post(
       Uri.parse('$baseUrl/ds/predict-retention'),
       headers: headers,
-      body: jsonEncode({'deck_id': deckId}),
+      body: jsonEncode({'id': deckId}),
     );
 
     if (response.statusCode == 200) {

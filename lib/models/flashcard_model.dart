@@ -24,15 +24,16 @@ class FlashcardModel {
       deckId: deckId,
       question: json['question'] ?? '',
       answer: json['correct_answer'] ?? json['answer'] ?? '',
-      difficultyLevel: json['difficulty'] ?? 'medium',
+      difficultyLevel: json['score'] ?? 'medium',
     );
   }
+
 
   Map<String, dynamic> toJson() => {
     'id': card_id,
     'deck_id': deckId,
     'question': question,
     'answer': answer,
-    'difficulty_level': difficultyLevel,
+    'score': difficultyLevel,
   };
 }

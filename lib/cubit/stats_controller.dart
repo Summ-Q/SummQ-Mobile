@@ -8,6 +8,10 @@ class StatsController extends ChangeNotifier {
     _loadSavedData();
   }
 
+  bool isDeckStudied(int deckId) {
+    return _studiedDeckIds.contains(deckId);
+  }
+
   Set<int> _studiedDeckIds = {};
   int _decksCreated = 0;
 
