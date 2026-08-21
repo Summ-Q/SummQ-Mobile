@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import '../models/Performance_model.dart';
 import '../models/user_model.dart';
 import '../models/decks_model.dart';
 import '../models/flashcard_model.dart';
@@ -318,19 +319,21 @@ class ApiService {
 
   /// POST /ds/predict-retention
   /// Fetches the retention prediction from the Python DS model
-  Future<double> predictRetention(int deckId) async {
+  Future<List<PerformanceModel>> getUserPerformance() async {
     final headers = await _getHeaders(requiresAuth: true);
-    final response = await http.post(
-      Uri.parse('$baseUrl/ds/predict-retention'),
+
+    final response = await http.get(
+      Uri.parse('$baseUrl/reviews/weekly-count'),
       headers: headers,
-      body: jsonEncode({'id': deckId}),
     );
 
     if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      return (data['retention_score'] ?? 0.0).toDouble();
+      final decoded = jsonDecode(response.body);
+
+      List<dynamic> list = decoded['data'];
+      return list.map((json) => PerformanceModel.fromJson(json)).toList();
     } else {
-      throw Exception('Failed to get retention prediction');
+      throw Exception('Failed to load performance data');
     }
   }
 }
