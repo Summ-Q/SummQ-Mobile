@@ -36,6 +36,7 @@ class _HomeTabState extends State<HomeTab> {
     StatsController.instance.setDecksCreated(decksCount);
   }
 
+  
   Future<void> _deleteDeck(DeckData deck) async {
     final confirmed = await showDialog<bool>(
       context: context,
