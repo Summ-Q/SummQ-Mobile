@@ -36,6 +36,44 @@ class _HomeTabState extends State<HomeTab> {
     StatsController.instance.setDecksCreated(decksCount);
   }
 
+  Future<void> _deleteDeck(DeckData deck) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.cream,
+        title: const Text('Delete Deck'),
+        content: Text('Are you sure you want to delete "${deck.title}"? This cannot be undone.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    final success = await context.read<DeckProvider>().deleteDeck(deck.id);
+    if (!mounted) return;
+
+    if (success) {
+      final decksCount = context.read<DeckProvider>().decks.length;
+      StatsController.instance.setDecksCreated(decksCount);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Deck deleted')),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to delete deck')),
+      );
+    }
+  }
+
   Future<void> _openDeck(DeckData deck) async {
     try {
       final cards = await ApiService().getCardsForDeck(deck.id);
@@ -189,7 +227,10 @@ class _HomeTabState extends State<HomeTab> {
                             padding: const EdgeInsets.only(bottom: 14),
                             child: GestureDetector(
                               onTap: () => _openDeck(deckData),
-                              child: _DeckCard(data: deckData),
+                                child: _DeckCard(
+                                  data: deckData,
+                                  onDelete: () => _deleteDeck(deckData),
+                                ),
                             ),
                           );
                         }).toList(),
@@ -258,7 +299,8 @@ class _IconCard extends StatelessWidget {
 
 class _DeckCard extends StatelessWidget {
   final DeckData data;
-  const _DeckCard({required this.data});
+  final VoidCallback? onDelete;
+  const _DeckCard({required this.data, this.onDelete});
 
   @override
   Widget build(BuildContext context) {
@@ -277,7 +319,18 @@ class _DeckCard extends StatelessWidget {
               Text(data.subtitle, style: appFont(size: 13, weight: FontWeight.w500, color: AppColors.navy)),
             ],
           ),
-          Text(data.progress, style: appFont(size: 15, weight: FontWeight.w700, color: Colors.white)),
+          Row(
+            children: [
+              //Text(data.progress, style: appFont(size: 15, weight: FontWeight.w700, color: Colors.white)),
+              if (onDelete != null) ...[
+                const SizedBox(width: 8),
+                GestureDetector(
+                  onTap: onDelete,
+                  child: const Icon(Icons.delete_outline, color: Colors.white70, size: 22),
+                ),
+              ],
+            ],
+          ),
         ],
       ),
     );

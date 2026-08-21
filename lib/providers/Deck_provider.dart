@@ -28,4 +28,17 @@ class DeckProvider extends ChangeNotifier {
     _decks.add(newDeck);
     notifyListeners();
   }
+
+  Future<bool> deleteDeck(int deckId) async {
+    try {
+      final success = await _apiService.deleteDeck(deckId);
+      if (success) {
+        _decks.removeWhere((deck) => deck.id == deckId);
+        notifyListeners();
+      }
+      return success;
+    } catch (e) {
+      return false;
+    }
+  }
 }

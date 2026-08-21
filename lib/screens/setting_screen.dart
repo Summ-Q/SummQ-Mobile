@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/Auth_provider.dart';
 import '../theme.dart';
 import '../widgets/buildSettingRows.dart';
+import 'login_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -99,6 +102,45 @@ class _SettingsScreenState extends State<SettingsScreen> {
           Center(
             child: TextButton(
               onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (ctx) => AlertDialog(
+                    backgroundColor: AppColors.cream, // Match your theme
+                    title: const Text("Delete Account", style: TextStyle(color: AppColors.navy)),
+                    content: const Text(
+                        "Are you absolutely sure? This action cannot be undone and you will lose all your decks and progress.",
+                        style: TextStyle(color: AppColors.navy)
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(ctx),
+                        child: const Text("Cancel", style: TextStyle(color: Colors.grey)),
+                      ),
+                      TextButton(
+                        onPressed: () async {
+                          Navigator.pop(ctx);
+
+                          try {
+                            await context.read<AuthProvider>().logout();
+                            if (context.mounted) {
+                              Navigator.of(context).pushAndRemoveUntil(
+                                MaterialPageRoute(builder: (context) => const LoginScreen()),
+                                    (Route<dynamic> route) => false,
+                              );
+                            }
+                          } catch (e) {
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text("Error: $e")),
+                              );
+                            }
+                          }
+                        },
+                        child: const Text("Confirm", style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold)),
+                      ),
+                    ],
+                  ),
+                );
               },
               child: Text(
                 'Delete Account',

@@ -1,6 +1,12 @@
+import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:mobile_flutter/providers/Deck_provider.dart';
+import 'package:mobile_flutter/screens/study_flashcards.dart';
 import 'package:mobile_flutter/theme.dart';
+import 'package:provider/provider.dart';
+import '../AiLoading_Modal.dart';
+import '../server/Api.dart';
 
 Future<void> showDeckModal(BuildContext context) {
   return showDialog(
@@ -9,6 +15,51 @@ Future<void> showDeckModal(BuildContext context) {
       final deckNameController = TextEditingController();
       PlatformFile? pickedFile;
       String? selectedFileName;
+      File? selectedFile;
+
+      Future<void> handleGenerateFromPdf() async {
+        if (selectedFileName == null && selectedFile == null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Please select a PDF file first!')),
+          );
+          return;
+        }
+        showAILoadingModal(context);
+        try {
+          final newDeck = await ApiService().createDeck(title: deckNameController.text);
+          final generatedCards = await ApiService().generateFlashcardsFromPDF(
+            deckId: newDeck.id,
+            pdfFile: selectedFile!,
+          );
+
+          if (context.mounted) Navigator.pop(context);
+
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Cards generated successfully!')),
+            );
+
+            context.read<DeckProvider>().fetchDecks();
+
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => StudyFlashcard(
+              deckTitle: newDeck.title,
+              flashcards: generatedCards,
+            ),
+            ),
+            );
+          }
+
+        } catch (e) {
+          if (context.mounted) Navigator.pop(context);
+
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Error: $e')),
+            );
+            print("❌Error: $e");
+          }
+        }
+      }
       return StatefulBuilder(
           builder: (context, setState) {
             return Dialog(
@@ -60,6 +111,10 @@ Future<void> showDeckModal(BuildContext context) {
                           setState(() {
                             pickedFile = file;
                             selectedFileName = file.name;
+
+                            if (file.path != null) {
+                              selectedFile = File(file.path!);
+                            }
                           });
                         }
                       },
@@ -84,13 +139,13 @@ Future<void> showDeckModal(BuildContext context) {
                       children: [
                         ElevatedButton(
                           onPressed: () {
-                            if (selectedFileName == null) {
+                            if (deckNameController.text.isEmpty) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text("Please select a PDF first!")),
+                                const SnackBar(content: Text('Please select file.')),
                               );
                               return;
                             }
-                            Navigator.pop(context);
+                            handleGenerateFromPdf();
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.navy,

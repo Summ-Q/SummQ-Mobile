@@ -153,6 +153,7 @@ class _PasteNotesScreenState extends State<PasteScreen> {
         } catch (e) {
             if (mounted) {
             Navigator.pop(context);
+            print("❌ ERROR in Paste Note: $e");
             ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Failed to generate cards: $e')),
             );

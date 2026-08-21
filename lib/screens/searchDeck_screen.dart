@@ -201,7 +201,7 @@ class _SearchDeckCard extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 10),
-          Text(data.progress, style: appFont(size: 15, weight: FontWeight.w700, color: Colors.white)),
+          //Text(data.progress, style: appFont(size: 15, weight: FontWeight.w700, color: Colors.white)),
         ],
       ),
     );

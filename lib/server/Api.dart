@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -7,7 +8,7 @@ import '../models/decks_model.dart';
 import '../models/flashcard_model.dart';
 
 class ApiService {
-  static const String baseUrl = 'https://6cf2-156-210-32-131.ngrok-free.app/my-api';
+  static const String baseUrl = 'https://summ-q-laraval-api.vercel.app/my-api';
 
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
 
@@ -15,8 +16,8 @@ class ApiService {
     final headers = {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
-      'Connection': 'close',
-      'ngrok-skip-browser-warning': 'true'
+      // 'Connection': 'close',
+      // 'ngrok-skip-browser-warning': 'true'
     };
 
     if (requiresAuth) {
@@ -154,6 +155,9 @@ class ApiService {
       headers: headers,
     );
 
+    if (response.statusCode != 200 && response.statusCode != 204) {
+      throw Exception('Failed to delete deck: ${response.body}');
+    }
     return response.statusCode == 200 || response.statusCode == 204;
   }
 
@@ -184,30 +188,60 @@ class ApiService {
       return list.map((json) => FlashcardModel.fromJson(json)).toList();
 
     } else {
-      throw Exception('Failed to generate flashcards: ${response.body}');
+      return [];
     }
   }
-  // Future<List<FlashcardModel>> generateFlashcards({
-  //   required int deckId,
-  //   required String notes,
-  // }) async {
-  //   final headers = await _getHeaders(requiresAuth: true);
-  //   final response = await http.post(
-  //     Uri.parse('$baseUrl/decks/$deckId/generate'),
-  //     headers: headers,
-  //     body: jsonEncode({
-  //       'notes': notes,
-  //     }),
-  //   );
-  //
-  //   if (response.statusCode == 200 || response.statusCode == 201) {
-  //     final dynamic decoded = jsonDecode(response.body);
-  //     final List<dynamic> list = decoded is List ? decoded : (decoded['cards'] ?? decoded['data'] ?? []);
-  //     return list.map((json) => FlashcardModel.fromJson(json)).toList();
-  //   } else {
-  //      throw Exception('Failed to generate flashcards from notes');
-  //   }
-  // }
+
+  /// Generates flashcards via Python GenAI from pdf
+  ///
+  Future<List<FlashcardModel>> generateFlashcardsFromPDF({
+    required int deckId,
+    required File pdfFile,
+  }) async {
+
+    final headers = await _getHeaders(requiresAuth: true);
+
+    var request = http.MultipartRequest(
+      'POST', Uri.parse('$baseUrl/decks/$deckId/generate'),
+    );
+
+    request.headers.addAll(headers);
+
+    request.files.add(
+      await http.MultipartFile.fromPath(
+        'file', pdfFile.path,
+      ),
+    );
+
+    var response = await request.send();
+
+    var responseBody = await response.stream.bytesToString();
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      final dynamic decoded = jsonDecode(responseBody);
+      print("API Response: $decoded");
+
+      List<dynamic> list = [];
+
+      if (decoded is Map<String, dynamic> && decoded.containsKey('data')) {
+
+        dynamic cardsList = decoded['data']['cards'];
+
+        if (cardsList is List) {
+          list = cardsList;
+        } else {
+          throw Exception("Found 'data' but 'cards' list is missing or invalid.");
+        }
+
+      } else {
+        throw Exception("Invalid response format: 'data' object not found.");
+      }
+
+      return list.map((json) => FlashcardModel.fromJson(json)).toList();
+
+    } else {
+      throw Exception('Failed to generate flashcards: ${responseBody}');
+    }
+  }
 
   /// GET /api/decks/{deck_id}/cards
   /// Retrieves all flashcards inside a deck

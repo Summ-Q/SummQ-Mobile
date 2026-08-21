@@ -3,6 +3,7 @@ import 'package:mobile_flutter/screens/setting_screen.dart';
 import 'package:provider/provider.dart';
 import '../providers/Auth_provider.dart';
 import '../theme.dart';
+import 'login_screen.dart';
 
 class ProfileTab extends StatelessWidget {
   const ProfileTab({super.key,});
@@ -38,7 +39,49 @@ class ProfileTab extends StatelessWidget {
                 },child: _ProfileRow(icon: Icons.settings_outlined, label: 'Settings')),
             _ProfileRow(icon: Icons.notifications_none_rounded, label: 'Notifications'),
             _ProfileRow(icon: Icons.help_outline_rounded, label: 'Help & Support'),
-            _ProfileRow(icon: Icons.logout_rounded, label: 'Log out'),
+            GestureDetector(
+              onTap: (){
+                showDialog(
+                  context: context,
+                  builder: (ctx) => AlertDialog(
+                    backgroundColor: AppColors.cream,
+                    title: const Text("Delete Account", style: TextStyle(color: AppColors.navy)),
+                    content: const Text(
+                        "Are you absolutely sure? This action cannot be undone and you will lose all your decks and progress.",
+                        style: TextStyle(color: AppColors.navy)
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(ctx),
+                        child: const Text("Cancel", style: TextStyle(color: Colors.grey)),
+                      ),
+                      TextButton(
+                        onPressed: () async {
+                          Navigator.pop(ctx);
+
+                          try {
+                            await context.read<AuthProvider>().logout();
+                            if (context.mounted) {
+                              Navigator.of(context).pushAndRemoveUntil(
+                                MaterialPageRoute(builder: (context) => const LoginScreen()),
+                                    (Route<dynamic> route) => false,
+                              );
+                            }
+                          } catch (e) {
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text("Error: $e")),
+                              );
+                            }
+                          }
+                        },
+                        child: const Text("Confirm", style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold)),
+                      ),
+                    ],
+                  ),
+                );
+              },
+                child: _ProfileRow(icon: Icons.logout_rounded, label: 'Log out')),
           ],
         ),
       ),

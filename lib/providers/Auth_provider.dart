@@ -25,8 +25,12 @@ class AuthProvider extends ChangeNotifier {
   }
 
   Future<void> logout() async {
-    await _apiService.logout();
-    _currentUser = null;
-    notifyListeners();
+    try{
+      await _apiService.logout();
+      _currentUser = null;
+      notifyListeners();
+    }catch (e){
+      throw Exception("Could not delete account: $e");
+    }
   }
 }
