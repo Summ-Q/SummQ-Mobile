@@ -168,7 +168,7 @@ class _SearchForDeckState extends State<SearchForDeck> {
                   );
                 }
               },
-              child: _SearchDeckCard(data: deck),
+              child: SearchDeckCard(data: deck),
             );
           },
         );
@@ -177,9 +177,9 @@ class _SearchForDeckState extends State<SearchForDeck> {
   }
 }
 
-class _SearchDeckCard extends StatelessWidget {
+class SearchDeckCard extends StatelessWidget {
   final DeckData data;
-  const _SearchDeckCard({required this.data});
+  const SearchDeckCard({required this.data});
 
   @override
   Widget build(BuildContext context) {
@@ -201,7 +201,6 @@ class _SearchDeckCard extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 10),
-          //Text(data.progress, style: appFont(size: 15, weight: FontWeight.w700, color: Colors.white)),
         ],
       ),
     );

@@ -39,7 +39,6 @@ class StudyProvider extends ChangeNotifier {
         );
       } catch (e) {
         debugPrint('Error submitting review: $e');
-        // You can handle offline caching here in the future
       }
     }
 
@@ -47,9 +46,9 @@ class StudyProvider extends ChangeNotifier {
       _currentIndex++;
       _isAnswerRevealed = false;
       notifyListeners();
-      return false; // Session continues
+      return false;
     } else {
-      return true; // Session complete
+      return true;
     }
   }
 }

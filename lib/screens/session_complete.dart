@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
+import 'package:provider/provider.dart';
 
+import '../providers/Auth_provider.dart';
 import '../theme.dart';
 
 class SessionComplete extends StatelessWidget {
@@ -10,6 +12,8 @@ class SessionComplete extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final authProvider = context.watch<AuthProvider>();
+    final String userName = authProvider.currentUser?.name ?? 'User';
     return Scaffold(
       backgroundColor: AppColors.navy,
       body: Center(
@@ -30,7 +34,7 @@ class SessionComplete extends StatelessWidget {
             const SizedBox(height: 20),
 
             Text(
-              "Great job, mai! 🎉",
+              "Great job, $userName ! 🎉",
               style: TextStyle(fontSize: 20, color: AppColors.orangCream),
             ),
             Text(

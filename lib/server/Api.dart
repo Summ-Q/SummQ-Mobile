@@ -164,9 +164,8 @@ class ApiService {
 
   // 3. FLASHCARDS & AI ENDPOINTS
 
-  /// POST /api/decks/{deck_id}/generate
-  /// Generates flashcards via Python GenAI from text notes
-  /// POST /api/decks/{deck_id}/generate
+  /// Generates flashcards via Python GenAI from (text notes)
+
   Future<List<FlashcardModel>> generateFlashcards({
     required int deckId,
     required String notes,
@@ -183,9 +182,20 @@ class ApiService {
     );
 
     if (response.statusCode == 200 || response.statusCode == 201) {
-      final dynamic decoded = jsonDecode(response.body);
+      final decoded = jsonDecode(response.body);
 
-      final List<dynamic> list = decoded is List ? decoded : (decoded['cards'] ?? decoded['data'] ?? []);
+      List<dynamic> list = [];
+
+      if (decoded['data'] != null && decoded['data']['cards'] != null) {
+        list = decoded['data']['cards'];
+      }
+      else if (decoded['cards'] != null) {
+        list = decoded['cards'];
+      }
+      else if (decoded is List) {
+        list = decoded;
+      }
+
       return list.map((json) => FlashcardModel.fromJson(json)).toList();
 
     } else {
@@ -194,7 +204,7 @@ class ApiService {
   }
 
   /// Generates flashcards via Python GenAI from pdf
-  ///
+
   Future<List<FlashcardModel>> generateFlashcardsFromPDF({
     required int deckId,
     required File pdfFile,
@@ -215,32 +225,42 @@ class ApiService {
     );
 
     var response = await request.send();
-
     var responseBody = await response.stream.bytesToString();
+
+    print("⚠️PDF API Response Code: ${response.statusCode}");
+    print("⚠️PDF API Response Body: $responseBody");
+
     if (response.statusCode == 200 || response.statusCode == 201) {
-      final dynamic decoded = jsonDecode(responseBody);
-      print("API Response: $decoded");
+      try {
+        final dynamic decoded = jsonDecode(responseBody);
+        List<dynamic> list = [];
 
-      List<dynamic> list = [];
-
-      if (decoded is Map<String, dynamic> && decoded.containsKey('data')) {
-
-        dynamic cardsList = decoded['data']['cards'];
-
-        if (cardsList is List) {
-          list = cardsList;
-        } else {
-          throw Exception("Found 'data' but 'cards' list is missing or invalid.");
+        if (decoded is Map<String, dynamic>) {
+          if (decoded['data'] != null && decoded['data'] is Map && decoded['data']['cards'] != null) {
+            list = decoded['data']['cards'];
+          }
+          else if (decoded['cards'] != null) {
+            list = decoded['cards'];
+          }
+        }
+        else if (decoded is List) {
+          list = decoded;
         }
 
-      } else {
-        throw Exception("Invalid response format: 'data' object not found.");
+        if (list.isEmpty) {
+          print("⚠️ السيرفر رد بنجاح بس مفيش كروت في الرد (أو شكل الـ JSON اتغير)");
+          return [];
+        }
+
+        return list.map((json) => FlashcardModel.fromJson(json)).toList();
+
+      } catch (e) {
+        print("⚠️ خطأ أثناء قراءة الكروت من السيرفر: $e");
+        return [];
       }
 
-      return list.map((json) => FlashcardModel.fromJson(json)).toList();
-
     } else {
-      throw Exception('Failed to generate flashcards: ${responseBody}');
+      throw Exception('Failed to generate flashcards: $responseBody');
     }
   }
 
@@ -334,6 +354,24 @@ class ApiService {
       return list.map((json) => PerformanceModel.fromJson(json)).toList();
     } else {
       throw Exception('Failed to load performance data');
+    }
+  }
+  /// get Notification for every day
+
+  Future<List<DeckModel>> getStudyDecks(int deckId) async {
+    final headers = await _getHeaders(requiresAuth: true);
+
+    final response = await http.get(
+      Uri.parse('$baseUrl/decks/$deckId/study'),
+      headers: headers,
+    );
+
+    if (response.statusCode == 200) {
+      final dynamic decoded = jsonDecode(response.body);
+      final List<dynamic> list = decoded is List ? decoded : (decoded['data'] ?? []);
+      return list.map((json) => DeckModel.fromJson(json)).toList();
+    } else {
+      throw Exception('Failed to fetch decks. Status Code: ${response.statusCode}');
     }
   }
 }

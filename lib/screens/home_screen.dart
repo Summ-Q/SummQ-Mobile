@@ -4,7 +4,6 @@ import 'package:mobile_flutter/screens/paste_note.dart';
 import 'package:mobile_flutter/screens/searchDeck_screen.dart';
 import 'package:mobile_flutter/screens/setting_screen.dart';
 import 'package:mobile_flutter/screens/study_flashcards.dart';
-import 'package:mobile_flutter/models/flashcard_model.dart';
 import '../cubit/stats_controller.dart';
 import '../providers/Auth_provider.dart';
 import '../providers/Deck_provider.dart';

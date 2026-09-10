@@ -6,6 +6,7 @@ import 'package:mobile_flutter/screens/study_flashcards.dart';
 import 'package:mobile_flutter/theme.dart';
 import 'package:provider/provider.dart';
 import '../AiLoading_Modal.dart';
+import '../models/flashcard_model.dart';
 import '../server/Api.dart';
 
 Future<void> showDeckModal(BuildContext context) {
@@ -27,10 +28,14 @@ Future<void> showDeckModal(BuildContext context) {
         showAILoadingModal(context);
         try {
           final newDeck = await ApiService().createDeck(title: deckNameController.text);
-          final generatedCards = await ApiService().generateFlashcardsFromPDF(
+          List<FlashcardModel> generatedCards = [];
+          try{
+          generatedCards = await ApiService().generateFlashcardsFromPDF(
             deckId: newDeck.id,
             pdfFile: selectedFile!,
-          );
+          );}catch(e){
+            print("⚠️ إيرور في قراءة كروت الـ PDF: $e");
+          }
 
           if (context.mounted) Navigator.pop(context);
 

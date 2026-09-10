@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mobile_flutter/screens/study_flashcards.dart';
 import 'package:provider/provider.dart';
 import '../AiLoading_Modal.dart';
+import '../models/flashcard_model.dart';
 import '../providers/Deck_provider.dart';
 import '../server/Api.dart';
 import '../theme.dart';
@@ -133,23 +134,34 @@ class _PasteNotesScreenState extends State<PasteScreen> {
 
           try {
             final newDeck = await ApiService().createDeck(title: deckName);
-            final generatedCards = await ApiService().generateFlashcards(
-            deckId: newDeck.id,
-            notes: notes
-          );
+            List<FlashcardModel> generatedCards = [];
+            try{
+              generatedCards = await ApiService().generateFlashcards(
+                  deckId: newDeck.id,
+                  notes: notes
+              );
 
-            if (mounted) {
-            context.read<DeckProvider>().fetchDecks();
+            }catch(e){
+              print("⚠️ : $e");
+            }
 
-            Navigator.pop(context);
+            if (context.mounted) {
 
-            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => StudyFlashcard(
-            deckTitle: newDeck.title,
-            flashcards: generatedCards,
+              Navigator.pop(context);
+
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Cards generated successfully!')),
+              );
+
+              context.read<DeckProvider>().fetchDecks();
+
+              Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => StudyFlashcard(
+                deckTitle: newDeck.title,
+                flashcards: generatedCards,
               ),
-            ),
-            );
-          }
+              ),
+              );
+            }
         } catch (e) {
             if (mounted) {
             Navigator.pop(context);
@@ -173,6 +185,7 @@ class _PasteNotesScreenState extends State<PasteScreen> {
             fontWeight: FontWeight.bold,
           ),),
       ),
+
       ),
       const SizedBox(height: 10),
       ]),
